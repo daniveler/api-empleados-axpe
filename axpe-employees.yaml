@@ -23,6 +23,29 @@ paths:
         - employees
       description: Employees Found
       operationId: get-employees
+      parameters:
+        - schema:
+            type: string
+          name: employeeName
+          in: query
+          required: false
+          description: Filter for searching employees by name
+
+        - schema:
+            type: string
+            pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
+          name: nif
+          in: query
+          required: false
+          description: Filter for searching employees by NIF
+
+        - schema:
+            type: string
+          name: status
+          in: query
+          required: false
+          description: Filter for searching employees by status
+        
       responses:
         '200':
           description: Employees Found
@@ -43,6 +66,8 @@ paths:
       summary: Get Employee Details by Employee Id
       tags: 
         - employees
+      operationId: get-employees-employeeId
+      description: Retrieve the information of the employee with the matching employee ID.
       responses:
         '200':
           description: Employee Found
@@ -53,17 +78,16 @@ paths:
               examples:
                 Get Employee Alice Smith:
                   value:
-                    id: 142
+                    id: 142ab
                     firstName: Alice
                     lastName: Smith
+                    nif: 12345678A
                     email: alice.smith@gmail.com
                     dateOfBirth: '1997-10-31'
                     emailVerified: true
                     signUpDate: '2019-08-24'
         '404':
           description: Employee Not Found
-      operationId: get-employees-employeeId
-      description: Retrieve the information of the employee with the matching employee ID.
     
     put:
       summary: Update Employee Information
@@ -134,29 +158,10 @@ paths:
     post:
       summary: Create New Employee
       operationId: post-employee
+      description: Create a new employee.
       tags: 
         - employees
-      responses:
-        '200':
-          description: Employee Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Employee'
-              examples:
-                New employee Bob Fellow:
-                  value:
-                    id: 12
-                    firstName: Bob
-                    lastName: Fellow
-                    email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
-        '400':
-          description: Missing Required Information
-        '409':
-          description: Email Already Taken
+
       requestBody:
         content:
           application/json:
@@ -167,6 +172,9 @@ paths:
                   type: string
                 lastName:
                   type: string
+                nif:
+                  type: string
+                  pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
                 email:
                   type: string
                 dateOfBirth:
@@ -175,6 +183,7 @@ paths:
               required:
                 - firstName
                 - lastName
+                - nif
                 - email
                 - dateOfBirth
             examples:
@@ -182,10 +191,33 @@ paths:
                 value:
                   firstName: Bob
                   lastName: Fellow
+                  nif: 23456789B
                   email: bob.fellow@gmail.com
                   dateOfBirth: '1996-08-24'
         description: Post the necessary fields for the API to create a new employee.
-      description: Create a new employee.
+
+      responses:
+        '200':
+          description: Employee Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+              examples:
+                New employee Bob Fellow:
+                  value:
+                    id: 123ab
+                    firstName: Bob
+                    lastName: Fellow
+                    nif: 23456789B
+                    email: bob.fellow@gmail.com
+                    dateOfBirth: '1996-08-24'
+                    emailVerified: false
+                    createDate: '2020-11-18'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: Email Already Taken
 
 components:
   schemas:
@@ -197,7 +229,7 @@ components:
         id: 142d
         firstName: Alice
         lastName: Smith
-        nif: cacatua
+        nif: 12345678A
         email: alice.smith@gmail.com
         dateOfBirth: '1997-10-31'
         emailVerified: true
@@ -215,7 +247,7 @@ components:
           format: email
         nif:
           type: string
-          format: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
+          pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
         status:
           type: string
         dateOfBirth:
@@ -228,7 +260,7 @@ components:
         createDate:
           type: string
           format: date
-          description: The date that the employee was created.
+          description: The date that the employee was added to the system.
       required:
         - id
         - firstName
@@ -236,3 +268,5 @@ components:
         - nif
         - email
         - emailVerified
+
+    
