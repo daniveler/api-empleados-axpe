@@ -1,0 +1,238 @@
+openapi: 3.0.1
+
+info:
+  title: axpe-employees
+  description: This API will provide information about employees working in the company Axpe Consulting S.L.
+  version: '0.0.1'
+  contact: 
+    name: Daniel Velerdas Sedano
+    email: daniel01velerdas@gmail.com
+
+tags:
+  - name: employees
+    description: Refers to existing employees from the company
+
+servers:
+  - url: 'http://localhost:3000'
+
+paths:
+  '/employees':
+    get:
+      summary: Get a list of employees
+      tags:
+        - employees
+      description: Employees Found
+      operationId: get-employees
+      responses:
+        '200':
+          description: Employees Found
+        
+        '404':
+          description: Employees Not Found
+  
+  '/employees/{employeeId}':
+    parameters:
+      - schema:
+          type: integer
+        name: employeeId
+        in: path
+        required: true
+        description: Id of an existing employee.
+    
+    get:
+      summary: Get Employee Details by Employee Id
+      tags: 
+        - employees
+      responses:
+        '200':
+          description: Employee Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+              examples:
+                Get Employee Alice Smith:
+                  value:
+                    id: 142
+                    firstName: Alice
+                    lastName: Smith
+                    email: alice.smith@gmail.com
+                    dateOfBirth: '1997-10-31'
+                    emailVerified: true
+                    signUpDate: '2019-08-24'
+        '404':
+          description: Employee Not Found
+      operationId: get-employees-employeeId
+      description: Retrieve the information of the employee with the matching employee ID.
+    
+    put:
+      summary: Update Employee Information
+      operationId: put-employees-employeeId
+      tags:
+        - employees
+      responses:
+        '200':
+          description: Employee Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+              examples:
+                Updated Employee Rebecca Baker:
+                  value:
+                    id: 13
+                    firstName: Rebecca
+                    lastName: Baker
+                    email: rebecca@gmail.com
+                    dateOfBirth: '1985-10-02'
+                    emailVerified: false
+                    createDate: '2019-08-24'
+        '404':
+          description: Employee Not Found
+        '409':
+          description: Email Already Taken
+      description: Update the information of an existing employee given the employee id.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  description: 'If a new email is given, the employee''s email verified property will be set to false.'
+                dateOfBirth:
+                  type: string
+            examples:
+              Update First Name:
+                value:
+                  firstName: Rebecca
+              Update Email:
+                value:
+                  email: rebecca@gmail.com
+              Update Last Name & Date of Birth:
+                value:
+                  lastName: Baker
+                  dateOfBirth: '1985-10-02'
+        description: Patch employee properties to update.
+
+    delete:
+      summary: Delete Employee 
+      operationId: delete-employee-employeeId
+      tags:
+        - employees
+      description: Delete an existing employee.
+      responses:
+        '200':
+          description: Employee Deleted
+
+  '/employee':
+    post:
+      summary: Create New Employee
+      operationId: post-employee
+      tags: 
+        - employees
+      responses:
+        '200':
+          description: Employee Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+              examples:
+                New employee Bob Fellow:
+                  value:
+                    id: 12
+                    firstName: Bob
+                    lastName: Fellow
+                    email: bob.fellow@gmail.com
+                    dateOfBirth: '1996-08-24'
+                    emailVerified: false
+                    createDate: '2020-11-18'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: Email Already Taken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                dateOfBirth:
+                  type: string
+                  format: date
+              required:
+                - firstName
+                - lastName
+                - email
+                - dateOfBirth
+            examples:
+              Create Employee Bob Fellow:
+                value:
+                  firstName: Bob
+                  lastName: Fellow
+                  email: bob.fellow@gmail.com
+                  dateOfBirth: '1996-08-24'
+        description: Post the necessary fields for the API to create a new employee.
+      description: Create a new employee.
+
+components:
+  schemas:
+    Employee:
+      title: Employee
+      type: object
+      description: ''
+      example:
+        id: 142d
+        firstName: Alice
+        lastName: Smith
+        nif: cacatua
+        email: alice.smith@gmail.com
+        dateOfBirth: '1997-10-31'
+        emailVerified: true
+        signUpDate: '2019-08-24'
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the given employee.
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        nif:
+          type: string
+          format: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
+        status:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1997-10-31'
+        emailVerified:
+          type: boolean
+          description: Set to true if the employee's email has been verified.
+        createDate:
+          type: string
+          format: date
+          description: The date that the employee was created.
+      required:
+        - id
+        - firstName
+        - lastName
+        - nif
+        - email
+        - emailVerified
