@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.0.2'
+  version: '0.0.3'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -26,25 +26,46 @@ paths:
       parameters:
         - schema:
             type: string
+            minLength: 1
+            maxLength: 20
           name: employeeName
           in: query
           required: false
           description: Filter for searching employees by name
-
+          
         - schema:
             type: string
-            pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
-          name: nif
+            minLength: 1
+            maxLength: 50
+            pattern: '^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])|[A-z0-9]{2,3}[0-9]{6}$'
+          name: identificationDocumentValue
           in: query
           required: false
           description: Filter for searching employees by NIF
 
         - schema:
             type: string
+            minLength: 1
+            maxLength: 20
           name: status
           in: query
           required: false
           description: Filter for searching employees by status
+
+        - schema:
+            type: string
+            #minLength: 1
+            #maxLength: 20
+            enum:
+              - DEVELOPMENT
+              - TESTING
+              - DESIGN
+              - MARKETING
+              - MAINTENANCE
+          name: department
+          in: query
+          required: false
+          description: Filter for searching employees by department
         
       responses:
         '200':
@@ -57,6 +78,7 @@ paths:
     parameters:
       - schema:
           type: integer
+          format: uuid
         name: employeeId
         in: path
         required: true
@@ -78,10 +100,14 @@ paths:
               examples:
                 Get Employee Alice Smith:
                   value:
-                    id: 142ab
+                    id: 123e4567-e89b-12d3-a456-426614174000
                     firstName: Alice
                     lastName: Smith
-                    nif: 12345678A
+                    identificationDocument:
+                      value: 12345678A
+                      documentType: NIF
+                    status: INDEFINITE
+                    department: DEVELOPMENT
                     email: alice.smith@gmail.com
                     dateOfBirth: '1997-10-31'
                     emailVerified: true
@@ -104,10 +130,15 @@ paths:
               examples:
                 Updated Employee Rebecca Baker:
                   value:
-                    id: 13
+                    id: 123e4567-e89b-12d3-a456-426614174000
                     firstName: Rebecca
                     lastName: Baker
                     email: rebecca@gmail.com
+                    identificationDocument:
+                      value: 12345678A
+                      documentType: NIF
+                    status: INDEFINITE
+                    department: DEVELOPMENT
                     dateOfBirth: '1985-10-02'
                     emailVerified: false
                     createDate: '2019-08-24'
@@ -172,9 +203,8 @@ paths:
                   type: string
                 lastName:
                   type: string
-                nif:
-                  type: string
-                  pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
+                identificationDocument:
+                  $ref: '#/components/schemas/IdentificationDocument'
                 email:
                   type: string
                 dateOfBirth:
@@ -183,15 +213,18 @@ paths:
               required:
                 - firstName
                 - lastName
-                - nif
+                - identificationDocument
                 - email
                 - dateOfBirth
             examples:
               Create Employee Bob Fellow:
                 value:
+                  id: 123f4567-e89a-12d3-a456-426614174000
                   firstName: Bob
                   lastName: Fellow
-                  nif: 23456789B
+                  identificationDocument: 
+                    value: 23456789B
+                    documentType: NIF
                   email: bob.fellow@gmail.com
                   dateOfBirth: '1996-08-24'
         description: Post the necessary fields for the API to create a new employee.
@@ -206,10 +239,14 @@ paths:
               examples:
                 New employee Bob Fellow:
                   value:
-                    id: 123ab
+                    id: 123f4567-e89a-12d3-a456-426614174000
                     firstName: Bob
                     lastName: Fellow
-                    nif: 23456789B
+                    identificationDocument: 
+                      value: 23456789B
+                      documentType: NIF
+                    status: INDEFINITE
+                    department: DEVELOPMENT
                     email: bob.fellow@gmail.com
                     dateOfBirth: '1996-08-24'
                     emailVerified: false
@@ -226,10 +263,14 @@ components:
       type: object
       description: Represents an employee related to the company.
       example:
-        id: 142d
+        id: 123e4567-e89b-12d3-a456-426614174000
         firstName: Alice
         lastName: Smith
-        nif: 12345678A
+        identificationDocument: 
+          value: 12345678A
+          documentType: NIF
+        status: INDEFINITE
+        department: DEVELOPMENT
         email: alice.smith@gmail.com
         dateOfBirth: '1997-10-31'
         emailVerified: true
@@ -237,22 +278,42 @@ components:
       properties:
         id:
           type: string
+          format: uuid
           description: Unique identifier for the given employee.
         firstName:
           type: string
+          minLength: 1
+          description: Name of the employee
         lastName:
           type: string
+          minLength: 1
+          description: Last names of the employee 
         email:
           type: string
           format: email
-        nif:
+          description: Main email adress of the employee
+        identificationDocument:
+          $ref: '#/components/schemas/IdentificationDocument'
+        department:
           type: string
-          pattern: '(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])$'
+          description: Department of the company where the employee belongs to.
+          enum:
+            - DEVELOPMENT
+            - TESTING
+            - DESIGN
+            - MARKETING
+            - MAINTENANCE
         status:
           type: string
+          description: Contractual status of the employee in the company. 
+          enum:
+            - TRAINEE
+            - TEMPORAL
+            - INDEFINITE
         dateOfBirth:
           type: string
           format: date
+          description: Birthdate of the employee.
           example: '1997-10-31'
         emailVerified:
           type: boolean
@@ -265,6 +326,30 @@ components:
         - id
         - firstName
         - lastName
-        - nif
+        - identificationDocument
+        - status
         - email
         - emailVerified
+
+    IdentificationDocument:
+      title: IdentificationDocument
+      type: object
+      description: Represents identification document information, showing the number and the type of document.
+      properties:
+        value:
+          description: ''
+          type: string
+          pattern: '^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])|[A-z0-9]{2,3}[0-9]{6}$'
+        documentType:
+          description: ''
+          type: string
+          enum:
+            - NIF
+            - NIE
+            - PASSPORT
+      example:
+        value: 12345678A
+        documentType: NIF
+      required:
+        - value
+            
