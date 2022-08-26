@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.0.3'
+  version: '0.1.0'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -27,7 +27,6 @@ paths:
         - schema:
             type: string
             minLength: 1
-            maxLength: 20
           name: employeeName
           in: query
           required: false
@@ -36,7 +35,6 @@ paths:
         - schema:
             type: string
             minLength: 1
-            maxLength: 50
             pattern: '^(X(-|\.)?0?\d{7}(-|\.)?[A-Z]|[A-Z](-|\.)?\d{7}(-|\.)?[0-9A-Z]|\d{8}(-|\.)?[A-Z])|[A-z0-9]{2,3}[0-9]{6}$'
           name: identificationDocumentValue
           in: query
@@ -46,7 +44,6 @@ paths:
         - schema:
             type: string
             minLength: 1
-            maxLength: 20
           name: status
           in: query
           required: false
@@ -55,7 +52,6 @@ paths:
         - schema:
             type: string
             #minLength: 1
-            #maxLength: 20
             enum:
               - DEVELOPMENT
               - TESTING
@@ -69,10 +65,27 @@ paths:
         
       responses:
         '200':
-          description: Employees Found
-        
+          description: Ok
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Employee'
+              # Preguntar duda para los ejemplos
+
         '404':
-          description: Employees Not Found
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid parameters:
+                  value:
+                    code: employeesNotFound
+                    message: Employees with given parameters were not found
+                    type: ERROR
+                    description: Try again, changing the parameters
+                  
   
   '/employees/{employeeId}':
     parameters:
@@ -92,7 +105,7 @@ paths:
       description: Retrieve the information of the employee with the matching employee ID.
       responses:
         '200':
-          description: Employee Found
+          description: Ok
           content:
             application/json:
               schema:
@@ -103,17 +116,31 @@ paths:
                     id: 123e4567-e89b-12d3-a456-426614174000
                     firstName: Alice
                     lastName: Smith
+                    email: alice.smith@gmail.com
+                    phoneNumber: +34 666 666 666
                     identificationDocument:
                       value: 12345678A
                       documentType: NIF
-                    status: INDEFINITE
+                    contractStatus: INDEFINITE
                     department: DEVELOPMENT
-                    email: alice.smith@gmail.com
                     dateOfBirth: '1997-10-31'
                     emailVerified: true
                     signUpDate: '2019-08-24'
+        
         '404':
-          description: Employee Not Found
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid parameters:
+                  value:
+                    code: employeeNotFound
+                    message: Employee with given id was not found
+                    type: ERROR
+                    description: Maybe you misspelled the id of the employee or the employee does not exist
+            
     
     put:
       summary: Update Employee Information
@@ -121,69 +148,59 @@ paths:
       tags:
         - employees
       responses:
-        '200':
-          description: Employee Updated
+        '204':
+          description: No content
+          
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employee'
+                $ref: '#/components/schemas/ErrorMessage'
               examples:
-                Updated Employee Rebecca Baker:
+                Invalid parameters:
                   value:
-                    id: 123e4567-e89b-12d3-a456-426614174000
-                    firstName: Rebecca
-                    lastName: Baker
-                    email: rebecca@gmail.com
-                    identificationDocument:
-                      value: 12345678A
-                      documentType: NIF
-                    status: INDEFINITE
-                    department: DEVELOPMENT
-                    dateOfBirth: '1985-10-02'
-                    emailVerified: false
-                    createDate: '2019-08-24'
-        '404':
-          description: Employee Not Found
-        '409':
-          description: Email Already Taken
+                    code: employeeNotFound
+                    message: Employee with given id was not found
+                    type: ERROR
+                    description: Maybe you misspelled the id of the employee or the employee does not exist
+
       description: Update the information of an existing employee given the employee id.
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  description: 'If a new email is given, the employee''s email verified property will be set to false.'
-                dateOfBirth:
-                  type: string
-            examples:
-              Update First Name:
-                value:
-                  firstName: Rebecca
-              Update Email:
-                value:
-                  email: rebecca@gmail.com
-              Update Last Name & Date of Birth:
-                value:
-                  lastName: Baker
-                  dateOfBirth: '1985-10-02'
+              $ref: '#/components/schemas/Employee'
+            #examples:
+              #Update of employee Alice:
+                #value:
+                  #firstName: Alice
+
         description: Patch employee properties to update.
 
     delete:
-      summary: Delete Employee 
+      summary: Delete an Employee
       operationId: delete-employee-employeeId
       tags:
         - employees
       description: Delete an existing employee.
       responses:
-        '200':
-          description: Employee Deleted
+        '204':
+          description: No content
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid parameters:
+                  value:
+                    code: employeeNotFound
+                    message: Employee with given id was not found
+                    type: ERROR
+                    description: Try again, changing the parameters
 
   '/employee':
     post:
@@ -230,31 +247,8 @@ paths:
         description: Post the necessary fields for the API to create a new employee.
 
       responses:
-        '200':
-          description: Employee Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Employee'
-              examples:
-                New employee Bob Fellow:
-                  value:
-                    id: 123f4567-e89a-12d3-a456-426614174000
-                    firstName: Bob
-                    lastName: Fellow
-                    identificationDocument: 
-                      value: 23456789B
-                      documentType: NIF
-                    status: INDEFINITE
-                    department: DEVELOPMENT
-                    email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
-        '400':
-          description: Missing Required Information
-        '409':
-          description: Email Already Taken
+        '201':
+          description: Created
 
 components:
   schemas:
@@ -266,15 +260,16 @@ components:
         id: 123e4567-e89b-12d3-a456-426614174000
         firstName: Alice
         lastName: Smith
+        email: alice.smith@gmail.com
+        phoneNumber: +34 666 666 666
         identificationDocument: 
           value: 12345678A
           documentType: NIF
-        status: INDEFINITE
         department: DEVELOPMENT
-        email: alice.smith@gmail.com
+        contractStatus: INDEFINITE
         dateOfBirth: '1997-10-31'
         emailVerified: true
-        signUpDate: '2019-08-24'
+        createDate: '2019-08-24'
       properties:
         id:
           type: string
@@ -292,6 +287,10 @@ components:
           type: string
           format: email
           description: Main email adress of the employee
+        phoneNumber:
+          type: string
+          pattern: '^(\+34|0034|34)?[ -]*(6|7)[ -]*([0-9][ -]*){8}$'
+          description: Main phone number of the employee
         identificationDocument:
           $ref: '#/components/schemas/IdentificationDocument'
         department:
@@ -303,7 +302,7 @@ components:
             - DESIGN
             - MARKETING
             - MAINTENANCE
-        status:
+        contractStatus:
           type: string
           description: Contractual status of the employee in the company. 
           enum:
@@ -327,7 +326,7 @@ components:
         - firstName
         - lastName
         - identificationDocument
-        - status
+        - contractStatus
         - email
         - emailVerified
 
@@ -352,4 +351,33 @@ components:
         documentType: NIF
       required:
         - value
-            
+
+    ErrorMessage:
+      title: ErrorMessage
+      type: object
+      description: Object returned when an error happens
+      properties:
+        code: 
+          type: string
+          description: Field which briefly defines the problem
+        message:
+          type: string
+          description: Message which describes the main issue
+        type: 
+          type: string
+          description: Describes the type of message displayed
+          enum:
+            - ERROR
+            - WARNING
+        description:
+          type: string
+          description: Describes other details of the error
+      example:
+        code: invalidParameters
+        message: There are invalid parameters in the request
+        type: ERROR
+        description: 'Address is not valid. Invalid character: ''@'''
+      required:
+        - code
+        - message
+        - type
