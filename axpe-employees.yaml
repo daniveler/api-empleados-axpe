@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.2.0'
+  version: '0.2.1'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -24,6 +24,22 @@ paths:
       description: Employees Found
       operationId: get-employees
       parameters:
+        - schema:
+              type: string
+          in: header
+          name: Authorization
+          required: true
+          description: Field which contains the access token of the API
+      
+        - schema:
+            type: string
+            format: uuid
+          in: header
+          name: X-Request-ID 
+          required: true
+          description: Identifier of the message
+
+        # QUERIES
         - schema:
             type: string
             minLength: 1
@@ -65,7 +81,7 @@ paths:
           in: query
           required: false
           description: Filter for searching employees by department
-        
+
       responses:
         '200':
           description: Ok
@@ -125,10 +141,10 @@ paths:
               examples:
                 Employees Not Found:
                   value:
-                    code: employeesNotFound
-                    message: Employees with were not found
+                    code: resourcesNotFound
+                    message: Resources requested were not found
                     type: ERROR
-                    description: Maybe there's no employees created yet.
+                    description: Maybe you could try changing the parameters of the request.
 
         '405':
           description: Method Not Allowed
@@ -255,13 +271,37 @@ paths:
                     message: The request was not complete
                     type: ERROR
                     description: Request was did not succeed from another server.
-  
+
     post:
       summary: Create New Employee
       operationId: post-employee
       description: Create a new employee.
       tags: 
         - employees
+
+      parameters:
+        - schema:
+              type: string
+          in: header
+          name: Authorization
+          required: true
+          description: Field which contains the access token of the API
+         
+        - schema:
+              type: string
+          in: header
+          name: Location
+          required: true
+          description: Field which contains the access token of the API
+      
+        - schema:
+            type: string
+            format: uuid
+          in: header
+          name: X-Request-ID 
+          required: true
+          description: Identifier of the message
+       
 
       requestBody:
         content:
@@ -459,6 +499,21 @@ paths:
   '/employees/{employeeId}':
     parameters:
       - schema:
+            type: string
+        in: header
+        name: Authorization
+        required: true
+        description: Field which contains the access token of the API
+    
+      - schema:
+          type: string
+          format: uuid
+        in: header
+        name: X-Request-ID 
+        required: true
+        description: Identifier of the message
+
+      - schema:
           type: integer
           format: uuid
         name: employeeId
@@ -471,7 +526,8 @@ paths:
       tags: 
         - employees
       operationId: get-employees-employeeId
-      description: Retrieve the information of the employee with the matching employee ID.
+      description: Retrieve the information of the employee with the matching employee ID.        
+      
       responses:
         '200':
           description: Ok
@@ -479,22 +535,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetEmployee'
-              examples:
-                Get Employee Alice Smith:
-                  value:
-                    id: 123e4567-e89b-12d3-a456-426614174000
-                    firstName: Alice
-                    lastName: Smith
-                    email: alice.smith@gmail.com
-                    phoneNumber: +34 666 666 666
-                    identificationDocument:
-                      value: 12345678A
-                      documentType: NIF
-                    contractStatus: INDEFINITE
-                    department: DEVELOPMENT
-                    dateOfBirth: '1997-10-31'
-                    emailVerified: true
-                    signUpDate: '2019-08-24'
         
         '401':
           description: Unauthorized
@@ -533,8 +573,8 @@ paths:
               examples:
                 Invalid parameters:
                   value:
-                    code: employeeNotFound
-                    message: Employee with given id was not found
+                    code: resourcesNotFound
+                    message: Resources requested were not found
                     type: ERROR
                     description: Maybe you misspelled the id of the employee or the employee does not exist.
         
@@ -724,8 +764,8 @@ paths:
               examples:
                 Invalid parameters:
                   value:
-                    code: employeeNotFound
-                    message: Employee with given id was not found
+                    code: resourcesNotFound
+                    message: Resources requested were not found
                     type: ERROR
                     description: Maybe you misspelled the id of the employee or the employee does not exist
 
@@ -939,10 +979,10 @@ paths:
               examples:
                 Invalid parameters:
                   value:
-                    code: employeeNotFound
-                    message: Employee with given id was not found
+                    code: resourcesNotFound
+                    message: Resources requested were not found
                     type: ERROR
-                    description: Try again, changing the parameters
+                    description: Maybe you misspelled the id of the employee or the employee does not exist
 
         '405':
           description: Method Not Allowed
@@ -1080,12 +1120,27 @@ paths:
 
       parameters:
         - schema:
+              type: string
+          in: header
+          name: Authorization
+          required: true
+          description: Field which contains the access token of the API
+      
+        - schema:
+            type: string
+            format: uuid
+          in: header
+          name: X-Request-ID 
+          required: true
+          description: Identifier of the message
+
+        - schema:
             type: string
             format: email
             minLength: 1
           name: employeeEmail
           in: query
-          required: false
+          required: true
           description: Email of the employee to validate
 
       responses:
@@ -1153,10 +1208,10 @@ paths:
               examples:
                 Invalid parameters:
                   value:
-                    code: employeeNotFound
-                    message: Employee with given mail was not found
+                    code: resourcesNotFound
+                    message: Resources requested were not found
                     type: ERROR
-                    description: Try again, changing the parameters
+                    description: Maybe you misspelled the email of the employee.
 
         '405':
           description: Method Not Allowed
@@ -1286,12 +1341,12 @@ paths:
 
 components:
   schemas:
-    GetEmployee:
-      title: GetEmployee
+    ItemEmployee:
+      title: ItemEmployee
       type: object
-      description: Structure created to return an employee in a get operation.
+      description: Structure created to represent an employee.
       example:
-        id: 123e4567-e89b-12d3-a456-426614174000
+        employeeId: 123e4567-e89b-12d3-a456-426614174000
         firstName: Alice
         lastName: Smith
         email: alice.smith@gmail.com
@@ -1305,7 +1360,7 @@ components:
         emailVerified: true
         createDate: '2019-08-24'
       properties:
-        id:
+        employeeId:
           type: string
           format: uuid
           description: Unique identifier for the given employee.
@@ -1356,7 +1411,7 @@ components:
           format: date
           description: The date that the employee was added to the system.
       required:
-        - id
+        - employeeId
         - firstName
         - lastName
         - identificationDocument
@@ -1364,41 +1419,95 @@ components:
         - email
         - emailVerified
 
+    GetEmployee:
+      title: GetEmployee
+      type: object
+      description: Structure created to return an employee in a get operation.
+      properties:
+        data:
+          type: array
+          items: {
+            $ref: '#/components/schemas/ItemEmployee'
+          }
+      example:
+        data:
+          - employeeId: 123e4567-e89b-12d3-a456-426614174000
+            firstName: Alice
+            lastName: Smith
+            email: alice.smith@gmail.com
+            phoneNumber: +34 666 666 666
+            identificationDocument: 
+              value: 12345678A
+              documentType: NIF
+            department: DEVELOPMENT
+            contractStatus: INDEFINITE
+            dateOfBirth: '1997-10-31'
+            emailVerified: true
+            createDate: '2019-08-24'
+
     GetEmployees:
       title: GetEmployees
-      type: array
+      type: object
       description: Structure created to return a list of employees in a get operation.
-      items: {
-        $ref: '#/components/schemas/GetEmployee'
-      }
+      properties:
+          data:
+            type: array
+            description: Field which contains the data returned by the HTTP method.
+            items: {
+              $ref: '#/components/schemas/ItemEmployee'
+            }
+          pagination:
+            type: object
+            description: Describes diferent aspects of the pagination.
+            properties:
+              actualPage:
+                type: integer
+                description: Actual page of the data shown.
+              totalPages:
+                type: integer
+                description: Total number of pages found by the operation GET.
+              resultsDisplayed:
+                type: integer
+                description: Number of results displayed for each page.
+              totalResults: 
+                type: integer
+                description: Total number of results found by the operation GET.
+      
       example:
-        - id: 123e4567-e89b-12d3-a456-426614174000
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          phoneNumber: +34 666 666 666
-          identificationDocument: 
-            value: 12345678A
-            documentType: NIF
-          department: DEVELOPMENT
-          contractStatus: INDEFINITE
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          createDate: '2019-08-24'
+        data:
+          - employeeId: 123e4567-e89b-12d3-a456-426614174000
+            firstName: Alice
+            lastName: Smith
+            email: alice.smith@gmail.com
+            phoneNumber: +34 666 666 666
+            identificationDocument: 
+              value: 12345678A
+              documentType: NIF
+            department: DEVELOPMENT
+            contractStatus: INDEFINITE
+            dateOfBirth: '1997-10-31'
+            emailVerified: true
+            createDate: '2019-08-24'
 
-        - id: 123f4567-e89a-12d3-a456-426614174000
-          firstName: Bob
-          lastName: Fellow
-          email: bob.fellow@gmail.com
-          phoneNumber: 666 66 66 67
-          identificationDocument: 
-            value: 12345678A
-            documentType: NIF
-          department: DEVELOPMENT
-          contractStatus: INDEFINITE
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          createDate: '2019-08-24'
+          - employeeId: 123f4567-e89a-12d3-a456-426614174000
+            firstName: Bob
+            lastName: Fellow
+            email: bob.fellow@gmail.com
+            phoneNumber: 666 66 66 67
+            identificationDocument: 
+              value: 12345678A
+              documentType: NIF
+            department: DEVELOPMENT
+            contractStatus: INDEFINITE
+            dateOfBirth: '1997-10-31'
+            emailVerified: true
+            createDate: '2019-08-24'
+        
+        pagination:
+          actualPage: 1
+          totalPages: 2
+          resultsDisplayed: 10
+          totalResults: 20
 
     PostPutEmployee:
       title: PostEmployee
