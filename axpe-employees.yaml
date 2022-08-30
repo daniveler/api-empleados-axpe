@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.1.3'
+  version: '0.2.0'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -72,10 +72,7 @@ paths:
           content:
             application/json:
               schema: 
-                type:  array
-                items: {
-                  $ref: '#/components/schemas/GetEmployees'
-                }
+                $ref: '#/components/schemas/GetEmployees'
 
         '400':
           description: Bad Request
@@ -259,6 +256,206 @@ paths:
                     type: ERROR
                     description: Request was did not succeed from another server.
   
+    post:
+      summary: Create New Employee
+      operationId: post-employee
+      description: Create a new employee.
+      tags: 
+        - employees
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostPutEmployee'
+        description: Post the necessary fields for the API to create a new employee.
+
+      responses:
+        '201':
+          description: Created
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid Parameters:
+                  value:
+                    code: invalidParameters
+                    message: The parameters given are invalid
+                    type: ERROR
+                    description: This operation does not require any parameters.
+
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid Parameters:
+                  value:
+                    code: userUnouthorized
+                    message: The user has no permission to perform the operation
+                    type: ERROR
+                    description: If you think this may be an error, please contact technical service.
+
+        '403':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Invalid Parameters:
+                  value:
+                    code: invalidParameters
+                    message: The parameters given are invalid
+                    type: ERROR
+                    description: The parameters given does not have the proper syntax.
+   
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: operationNotAllowed
+                    message: The operation performed was not allowed for this resource
+                    type: ERROR
+                    description: Try again performing other operation.
+
+        '406':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: wrongHeaderFormat
+                    message: The format specified in the "Accept" header is not allowed by the server
+                    type: ERROR
+                    description: Please, try again changing the format.
+
+        '415':
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: wrongContentTypeFormat
+                    message: The format specified in the "Content-Type" header is not allowed by the server
+                    type: ERROR
+                    description: Please, try again changing the format.
+
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: requestProcessingUnable
+                    message: The structure of the request is correct, but still server is unable to process the request
+                    type: ERROR
+                    description: The problem could be the semantics of the request.
+
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: tooManyRequests
+                    message: The user has sent too many requests in a given amount of time
+                    type: ERROR
+                    description: Please, try again in a few minutes.
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: unexpectedServerError
+                    message: An unexpected server error happened
+                    type: ERROR
+                    description: The server can not answer the request.
+          
+        '501':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: functionNotSupported
+                    message: The function requested is not supported by the server 
+                    type: ERROR
+                    description: The server can not answer the request.
+
+        '502':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: invalidResponse
+                    message: Received invalid response from input server
+                    type: ERROR
+                    description: The server can not answer the request.
+
+        '503':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: serverNotAvailable
+                    message: The server is not available at this moment
+                    type: ERROR
+                    description: Server is not available, maybe due to maintenance operations.
+
+        '504':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                Employees Not Found:
+                  value:
+                    code: requestNotComplete
+                    message: The request was not complete
+                    type: ERROR
+                    description: Request was did not succeed from another server.
+
   '/employees/{employeeId}':
     parameters:
       - schema:
@@ -490,20 +687,6 @@ paths:
                     type: ERROR
                     description: The parameters given does not have the proper syntax.  
         
-               '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Invalid Parameters:
-                  value:
-                    code: userUnouthorized
-                    message: The user has no permission to perform the operation
-                    type: ERROR
-                    description: If you think this may be an error, please contact technical service.
-
         '401':
           description: Unauthorized
           content:
@@ -545,20 +728,6 @@ paths:
                     message: Employee with given id was not found
                     type: ERROR
                     description: Maybe you misspelled the id of the employee or the employee does not exist
-
-                '405':
-          description: Method Not Allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: operationNotAllowed
-                    message: The operation performed was not allowed for this resource
-                    type: ERROR
-                    description: Try again performing other operation.
 
         '405':
           description: Method Not Allowed
@@ -900,209 +1069,8 @@ paths:
                     message: The request was not complete
                     type: ERROR
                     description: Request was did not succeed from another server.
-
-  '/employee':
-    post:
-      summary: Create New Employee
-      operationId: post-employee
-      description: Create a new employee.
-      tags: 
-        - employees
-
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostPutEmployee'
-        description: Post the necessary fields for the API to create a new employee.
-
-      responses:
-        '201':
-          description: Created
-
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Invalid Parameters:
-                  value:
-                    code: invalidParameters
-                    message: The parameters given are invalid
-                    type: ERROR
-                    description: This operation does not require any parameters.
-
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Invalid Parameters:
-                  value:
-                    code: userUnouthorized
-                    message: The user has no permission to perform the operation
-                    type: ERROR
-                    description: If you think this may be an error, please contact technical service.
-
-        '403':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Invalid Parameters:
-                  value:
-                    code: invalidParameters
-                    message: The parameters given are invalid
-                    type: ERROR
-                    description: The parameters given does not have the proper syntax.
-   
-        '405':
-          description: Method Not Allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: operationNotAllowed
-                    message: The operation performed was not allowed for this resource
-                    type: ERROR
-                    description: Try again performing other operation.
-
-        '406':
-          description: Not Acceptable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: wrongHeaderFormat
-                    message: The format specified in the "Accept" header is not allowed by the server
-                    type: ERROR
-                    description: Please, try again changing the format.
-
-        '415':
-          description: Unsupported Media Type
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: wrongContentTypeFormat
-                    message: The format specified in the "Content-Type" header is not allowed by the server
-                    type: ERROR
-                    description: Please, try again changing the format.
-
-        '422':
-          description: Unprocessable Entity
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: requestProcessingUnable
-                    message: The structure of the request is correct, but still server is unable to process the request
-                    type: ERROR
-                    description: The problem could be the semantics of the request.
-
-        '429':
-          description: Too Many Requests
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: tooManyRequests
-                    message: The user has sent too many requests in a given amount of time
-                    type: ERROR
-                    description: Please, try again in a few minutes.
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
-          
-        '501':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: functionNotSupported
-                    message: The function requested is not supported by the server 
-                    type: ERROR
-                    description: The server can not answer the request.
-
-        '502':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: invalidResponse
-                    message: Received invalid response from input server
-                    type: ERROR
-                    description: The server can not answer the request.
-
-        '503':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: serverNotAvailable
-                    message: The server is not available at this moment
-                    type: ERROR
-                    description: Server is not available, maybe due to maintenance operations.
-
-        '504':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: requestNotComplete
-                    message: The request was not complete
-                    type: ERROR
-                    description: Request was did not succeed from another server.
-
-  '/employee/validateEmail':
+    
+  '/employees/validate-email':
     post:
       summary: Validate Employee's email
       operationId: post-employee-validate-email
