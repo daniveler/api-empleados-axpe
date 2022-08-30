@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.1.0'
+  version: '0.1.1'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -44,14 +44,17 @@ paths:
         - schema:
             type: string
             minLength: 1
-          name: status
+            enum:
+              - TRAINEE
+              - TEMPORAL
+              - INDEFINITE
+          name: contractStatus
           in: query
           required: false
-          description: Filter for searching employees by status
+          description: Filter for searching employees by contractual status
 
         - schema:
             type: string
-            #minLength: 1
             enum:
               - DEVELOPMENT
               - TESTING
@@ -69,9 +72,11 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: '#/components/schemas/Employee'
-              # Preguntar duda para los ejemplos
-
+                type:  array
+                items: {
+                  $ref: '#/components/schemas/GetEmployees'
+                }
+            
         '404':
           description: Not Found
           content:
@@ -82,9 +87,9 @@ paths:
                 Invalid parameters:
                   value:
                     code: employeesNotFound
-                    message: Employees with given parameters were not found
+                    message: Employees with were not found
                     type: ERROR
-                    description: Try again, changing the parameters
+                    description: Maybe there's no employees created yet
                   
   
   '/employees/{employeeId}':
@@ -109,7 +114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employee'
+                $ref: '#/components/schemas/GetEmployee'
               examples:
                 Get Employee Alice Smith:
                   value:
@@ -170,13 +175,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Employee'
-            #examples:
-              #Update of employee Alice:
-                #value:
-                  #firstName: Alice
+              $ref: '#/components/schemas/PostPutEmployee'
 
-        description: Patch employee properties to update.
+        description: Update all editable properties from existing employee.
 
     delete:
       summary: Delete an Employee
@@ -214,36 +215,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                identificationDocument:
-                  $ref: '#/components/schemas/IdentificationDocument'
-                email:
-                  type: string
-                dateOfBirth:
-                  type: string
-                  format: date
-              required:
-                - firstName
-                - lastName
-                - identificationDocument
-                - email
-                - dateOfBirth
-            examples:
-              Create Employee Bob Fellow:
-                value:
-                  id: 123f4567-e89a-12d3-a456-426614174000
-                  firstName: Bob
-                  lastName: Fellow
-                  identificationDocument: 
-                    value: 23456789B
-                    documentType: NIF
-                  email: bob.fellow@gmail.com
-                  dateOfBirth: '1996-08-24'
+              $ref: '#/components/schemas/PostPutEmployee'
         description: Post the necessary fields for the API to create a new employee.
 
       responses:
@@ -252,10 +224,10 @@ paths:
 
 components:
   schemas:
-    Employee:
-      title: Employee
+    GetEmployee:
+      title: GetEmployee
       type: object
-      description: Represents an employee related to the company.
+      description: Structure created to return an employee in a get operation.
       example:
         id: 123e4567-e89b-12d3-a456-426614174000
         firstName: Alice
@@ -330,6 +302,103 @@ components:
         - email
         - emailVerified
 
+    PostPutEmployee:
+      title: PostEmployee
+      type: object
+      description: Structure created to create a new employee with a post operation or editing an existing one with a put operation.
+      example:
+        firstName: Alice
+        lastName: Smith
+        email: alice.smith@gmail.com
+        phoneNumber: +34 666 666 666
+        identificationDocument: 
+          value: 12345678A
+          documentType: NIF
+        department: DEVELOPMENT
+        contractStatus: INDEFINITE
+        dateOfBirth: '1997-10-31'
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          description: Name of the employee
+        lastName:
+          type: string
+          minLength: 1
+          description: Last names of the employee 
+        email:
+          type: string
+          format: email
+          description: Main email adress of the employee
+        phoneNumber:
+          type: string
+          pattern: '^(\+34|0034|34)?[ -]*(6|7)[ -]*([0-9][ -]*){8}$'
+          description: Main phone number of the employee
+        identificationDocument:
+          $ref: '#/components/schemas/IdentificationDocument'
+        department:
+          type: string
+          description: Department of the company where the employee belongs to.
+          enum:
+            - DEVELOPMENT
+            - TESTING
+            - DESIGN
+            - MARKETING
+            - MAINTENANCE
+        contractStatus:
+          type: string
+          description: Contractual status of the employee in the company. 
+          enum:
+            - TRAINEE
+            - TEMPORAL
+            - INDEFINITE
+        dateOfBirth:
+          type: string
+          format: date
+          description: Birthdate of the employee.
+          example: '1997-10-31'
+      required:
+        - firstName
+        - lastName
+        - identificationDocument
+        - email
+
+    GetEmployees:
+      title: GetEmployees
+      type: array
+      description: Structure created to return a list of employees in a get operation.
+      items: {
+        $ref: '#/components/schemas/GetEmployee'
+      }
+      example:
+        - id: 123e4567-e89b-12d3-a456-426614174000
+          firstName: Alice
+          lastName: Smith
+          email: alice.smith@gmail.com
+          phoneNumber: +34 666 666 666
+          identificationDocument: 
+            value: 12345678A
+            documentType: NIF
+          department: DEVELOPMENT
+          contractStatus: INDEFINITE
+          dateOfBirth: '1997-10-31'
+          emailVerified: true
+          createDate: '2019-08-24'
+
+        - id: 123f4567-e89a-12d3-a456-426614174000
+          firstName: Bob
+          lastName: Fellow
+          email: bob.fellow@gmail.com
+          phoneNumber: 666 66 66 67
+          identificationDocument: 
+            value: 12345678A
+            documentType: NIF
+          department: DEVELOPMENT
+          contractStatus: INDEFINITE
+          dateOfBirth: '1997-10-31'
+          emailVerified: true
+          createDate: '2019-08-24'
+
     IdentificationDocument:
       title: IdentificationDocument
       type: object
@@ -369,6 +438,7 @@ components:
           enum:
             - ERROR
             - WARNING
+            - INFO
         description:
           type: string
           description: Describes other details of the error
