@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.2.1'
+  version: '0.3.0'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
@@ -21,8 +21,14 @@ paths:
       summary: Get a list of employees
       tags:
         - employees
-      description: Employees Found
+      description: Get a list of all the employees related with the company based on some optional filters.
       operationId: get-employees
+      security:
+        - BasicAuth: [read]
+        - ApiKeyAuth: [read] 
+        - OAuth2:
+          - read
+      
       parameters:
         - schema:
               type: string
@@ -275,9 +281,15 @@ paths:
     post:
       summary: Create New Employee
       operationId: post-employee
-      description: Create a new employee.
+      description: Creates a new employee in the system.
       tags: 
         - employees
+
+      security:
+        - BasicAuth: [write]
+        - ApiKeyAuth: [write] 
+        - OAuth2:
+          - write
 
       parameters:
         - schema:
@@ -301,7 +313,6 @@ paths:
           name: X-Request-ID 
           required: true
           description: Identifier of the message
-       
 
       requestBody:
         content:
@@ -527,6 +538,11 @@ paths:
         - employees
       operationId: get-employees-employeeId
       description: Retrieve the information of the employee with the matching employee ID.        
+      security:
+        - BasicAuth: [read]
+        - ApiKeyAuth: [read] 
+        - OAuth2:
+          - read
       
       responses:
         '200':
@@ -709,6 +725,15 @@ paths:
       operationId: put-employees-employeeId
       tags:
         - employees
+      description: Update the information of an existing employee given the employee id.
+
+      security:
+        - BasicAuth: [read, write]
+        - ApiKeyAuth: [read, write] 
+        - OAuth2:
+          - read
+          - write
+      
       responses:
         '204':
           description: No content
@@ -909,7 +934,6 @@ paths:
                     type: ERROR
                     description: Request was did not succeed from another server.
       
-      description: Update the information of an existing employee given the employee id.
       requestBody:
         content:
           application/json:
@@ -923,7 +947,15 @@ paths:
       operationId: delete-employee-employeeId
       tags:
         - employees
-      description: Delete an existing employee.
+      description: Delete an existing employee given the employee id.
+      
+      security:
+        - BasicAuth: [read, write]
+        - ApiKeyAuth: [read, write] 
+        - OAuth2:
+          - read
+          - write
+      
       responses:
         '204':
           description: No content
@@ -1114,9 +1146,16 @@ paths:
     post:
       summary: Validate Employee's email
       operationId: post-employee-validate-email
-      description: Validates data related to an employee's email.
+      description: Validates data related to an employee's email given the employee email.
       tags: 
         - employees
+
+      security:
+        - BasicAuth: [read, write]
+        - ApiKeyAuth: [read, write] 
+        - OAuth2:
+          - read
+          - write
 
       parameters:
         - schema:
@@ -1340,6 +1379,25 @@ paths:
                     description: Request was did not succeed from another server.
 
 components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+
   schemas:
     ItemEmployee:
       title: ItemEmployee
