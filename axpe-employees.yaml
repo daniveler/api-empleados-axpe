@@ -280,7 +280,7 @@ paths:
 
     post:
       summary: Create New Employee
-      operationId: post-employee
+      operationId: post-employees
       description: Creates a new employee in the system.
       tags: 
         - employees
@@ -944,7 +944,7 @@ paths:
 
     delete:
       summary: Delete an Employee
-      operationId: delete-employee-employeeId
+      operationId: delete-employees-employeeId
       tags:
         - employees
       description: Delete an existing employee given the employee id.
@@ -1145,7 +1145,7 @@ paths:
   '/employees/validate-email':
     post:
       summary: Validate Employee's email
-      operationId: post-employee-validate-email
+      operationId: post-employees-validate-email
       description: Validates data related to an employee's email given the employee email.
       tags: 
         - employees
