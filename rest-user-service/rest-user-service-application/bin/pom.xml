@@ -7,7 +7,7 @@
 
 	<parent>
 		<groupId>com.axpe.exercices</groupId>
-		<artifactId>rest-user-service</artifactId>
+		<artifactId>rest-user-service-app</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 

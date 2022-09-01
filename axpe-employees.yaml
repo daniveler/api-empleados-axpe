@@ -31,22 +31,6 @@ paths:
       
       parameters:
         - schema:
-              type: string
-          in: header
-          name: Authorization
-          required: true
-          description: Field which contains the access token of the API
-      
-        - schema:
-            type: string
-            format: uuid
-          in: header
-          name: X-Request-ID 
-          required: true
-          description: Identifier of the message
-
-        # QUERIES
-        - schema:
             type: string
             minLength: 1
           name: employeeName
@@ -295,24 +279,9 @@ paths:
         - schema:
               type: string
           in: header
-          name: Authorization
-          required: true
-          description: Field which contains the access token of the API
-         
-        - schema:
-              type: string
-          in: header
           name: Location
           required: true
           description: Field which contains the access token of the API
-      
-        - schema:
-            type: string
-            format: uuid
-          in: header
-          name: X-Request-ID 
-          required: true
-          description: Identifier of the message
 
       requestBody:
         content:
@@ -509,21 +478,6 @@ paths:
 
   '/employees/{employeeId}':
     parameters:
-      - schema:
-            type: string
-        in: header
-        name: Authorization
-        required: true
-        description: Field which contains the access token of the API
-    
-      - schema:
-          type: string
-          format: uuid
-        in: header
-        name: X-Request-ID 
-        required: true
-        description: Identifier of the message
-
       - schema:
           type: integer
           format: uuid
