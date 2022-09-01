@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '0.3.0'
+  version: '1.0.0'
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
