@@ -1,7 +1,7 @@
 server:
   port: 8080
   servlet:
-    context-path: /rest-user-service    
+    context-path: /rest-user-service
     
 management:
   endpoints:
@@ -15,6 +15,7 @@ management:
 spring:
   profiles:
     active: local
+
 
 # H2
   h2:    
@@ -31,6 +32,7 @@ spring:
   sql:
     init:
       platform: h2  
+      mode: always
   jpa:
     hibernate:
       ddl-auto: none
@@ -39,3 +41,4 @@ spring:
       hibernate:
         format_sql: true
         hibernate.dialect: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true

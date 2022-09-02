@@ -2,6 +2,7 @@ package com.axpe.exercices.presentation.controllers;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,19 +16,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmployeeController
 {
+	@Autowired
 	private EmployeeRepository employeeRepository;
 	
 	@GetMapping("/employees")
-	public List<Employee> getAll()
+	public ResponseEntity<?> getAll()
 	{
-		List<Employee> employeesList = employeeRepository.findAll();
-		
-		return employeesList;
-		
-//		if (employeesList.isEmpty()) 
-//		{
-//			return ResponseEntity.noContent().build();
-//		}
-//		return ResponseEntity.ok(employeesList);
+		if (employeeRepository == null) 
+		{
+			return ResponseEntity.notFound().build();
+		}
+		else 
+		{
+			List<Employee> employeesList = employeeRepository.findAll();
+			
+			return ResponseEntity.ok(employeesList);
+		}
 	}
 }

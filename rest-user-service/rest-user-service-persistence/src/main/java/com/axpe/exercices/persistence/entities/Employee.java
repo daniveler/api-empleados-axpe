@@ -5,13 +5,15 @@ import java.sql.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Data @NoArgsConstructor @AllArgsConstructor
-@Entity
+@Entity @Table(name = "employees")
 public class Employee
 {
 	@Id @GeneratedValue
