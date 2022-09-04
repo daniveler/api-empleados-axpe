@@ -4,20 +4,33 @@ import java.sql.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
+enum ContractStatus
+{
+	INDEFINITE, TRAINEE, TEMPORAL
+}
+
+enum Department
+{
+	DEVELOPMENT, TESTING, DESIGN, MARKETING, MAINTENANCE
+}
 
 @Data @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "employees")
+@DynamicInsert(true)
 public class Employee
 {
 	@Id @GeneratedValue
-	private int employeeId;
+	private Long employeeId;
 	
 	private String firstName;
 	private String surname1;
@@ -28,22 +41,12 @@ public class Employee
 	private String nif;
 	private String nickname;
 	private String password;
-	private enum department
-	{
-		DEVELOPMENT, TESTING, DESIGN, MARKETING, MAINTENANCE
-	}
-	private enum contractStatus
-	{
-		TRAINEE, TEMPORAL, INDEFINITE
-	}
+	private Department department;
+	private ContractStatus contractStatus;
+	private boolean isEmailVerified;
 	private Date dateOfBirth;
 	private Date entryDate;
 	private Date cancelDate;
 	private Date modifiedDate;
-	
-	
-	
-	 
-	
 	 
 }

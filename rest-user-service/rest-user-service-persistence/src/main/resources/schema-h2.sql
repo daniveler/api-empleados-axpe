@@ -1,7 +1,9 @@
 -- Tabla employees
 CREATE SEQUENCE sq_employees;
 
-CREATE TABLE employees (	
+DROP TABLE employees;
+
+CREATE TABLE employees (
     /*id bigint NOT NULL,
     name varchar(50) NOT NULL,
     surname1 varchar(50),
@@ -25,8 +27,8 @@ CREATE TABLE employees (
     nif varchar(11) NOT NULL,
     nickname varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
-    department varchar(50),
-    contract_status varchar(255),
+    department enum('DEVELOPMENT', 'TESTIG', 'DESIGN', 'MARKETING', 'MAINTENANCE'),
+    contract_status enum('INDEFINITE', 'TRAINEE', 'TEMPORAL'),
     date_of_birth date,
     is_email_verified boolean NOT NULL,
     entry_date timestamp without time zone NOT NULL,
