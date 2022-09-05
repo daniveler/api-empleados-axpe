@@ -4,25 +4,17 @@ import java.sql.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
 
+import com.axpe.exercices.persistence.enums.ContractStatus;
+import com.axpe.exercices.persistence.enums.Department;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-enum ContractStatus
-{
-	INDEFINITE, TRAINEE, TEMPORAL
-}
-
-enum Department
-{
-	DEVELOPMENT, TESTING, DESIGN, MARKETING, MAINTENANCE
-}
 
 @Data @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "employees")

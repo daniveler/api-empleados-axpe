@@ -17,7 +17,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * @author coe.architecture@axpe.com
  */
 @ControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-
+public class RestExceptionHandler extends ResponseEntityExceptionHandler
+{
 	// Empty
+	
 }
