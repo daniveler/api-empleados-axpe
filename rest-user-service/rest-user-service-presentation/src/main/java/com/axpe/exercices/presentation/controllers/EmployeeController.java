@@ -1,6 +1,7 @@
 package com.axpe.exercices.presentation.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ import com.axpe.exercices.persistence.entities.Employee;
 import com.axpe.exercices.persistence.repository.EmployeeRepository;
 import com.axpe.exercices.presentation.exceptions.handler.EmployeeNotFoundException;
 import com.axpe.exercices.presentation.exceptions.handler.ErrorMessage;
+import com.axpe.exercices.service.dto.EmployeeDTO;
+import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +33,9 @@ import com.axpe.exercices.persistence.enums.ErrorType;
 public class EmployeeController
 {
 	@Autowired
-	private EmployeeRepository employeeRepository;
+	private final EmployeeRepository employeeRepository;
+	
+	private final EmployeeDTOMapper employeeDTOMapper;
 
 	@GetMapping("/employees")
 	public ResponseEntity<?> getAll()
@@ -42,21 +47,25 @@ public class EmployeeController
 			return ResponseEntity.notFound().build();
 		} else
 		{
-			return ResponseEntity.ok(employeesList);
+			List<EmployeeDTO> dtoList = employeesList.stream()
+					.map(employeeDTOMapper::convertToDto)
+					.collect(Collectors.toList());
+			
+			return ResponseEntity.ok(dtoList);
 		}
 	}
 
 	@GetMapping("/employees/{employeeId}")
-	public Employee getById(@PathVariable Long employeeId)
+	public EmployeeDTO getById(@PathVariable Long employeeId)
 	{
 		Employee employee = employeeRepository.findById(employeeId)
 				.orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 
-		return employee;
+		return employeeDTOMapper.convertToDto(employee);
 	}
 
 	@PutMapping("/employees/{employeeId}")
-	public ResponseEntity<?> putById(@RequestBody Employee newEmployee, @PathVariable Long employeeId)
+	public ResponseEntity<?> putById(@RequestBody EmployeeDTO newEmployee, @PathVariable Long employeeId)
 	{
 		return employeeRepository.findById(employeeId).map(e -> {
 			e.setFirstName(newEmployee.getFirstName());
@@ -64,7 +73,8 @@ public class EmployeeController
 			e.setSurname2(newEmployee.getSurname2());
 			e.setEmail(newEmployee.getEmail());
 			e.setPhoneNumber(newEmployee.getPhoneNumber());
-			e.setNif(newEmployee.getNif());
+			e.setIdentificationDocumentValue(newEmployee.getIdentificationDocumentValue());
+			e.setIdentificationDocumentType(newEmployee.getIdentificationDocumentType());
 			e.setNickname(newEmployee.getNickname());
 			e.setPassword(newEmployee.getPassword());
 			e.setDepartment(newEmployee.getDepartment());
@@ -74,14 +84,15 @@ public class EmployeeController
 			employeeRepository.save(e);
 
 			return ResponseEntity.noContent().build();
-		}).orElseGet(() -> {
-			return ResponseEntity.notFound().build();
-		});
+		}).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 	}
 
 	@PostMapping("/employees")
 	public ResponseEntity<?> post(@RequestBody Employee newEmployee)
 	{
+		// TODO: Parece que el fallo es por violación de unicidad de clave primaria.
+		// Es decir, al hacer el post, se le está intentando asignar el idEmployee 1
+		
 		Employee employee = employeeRepository.save(newEmployee);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(employee);
@@ -96,34 +107,11 @@ public class EmployeeController
 	@DeleteMapping("/employees/{employeeId}")
 	public ResponseEntity<?> delete(@PathVariable Long employeeId)
 	{
+		employeeRepository.findById(employeeId)
+			.orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+		
 		employeeRepository.deleteById(employeeId);
 
 		return ResponseEntity.noContent().build();
-	}
-
-	@ExceptionHandler(EmployeeNotFoundException.class)
-	public ResponseEntity<ErrorMessage> handlerNotFound(EmployeeNotFoundException ex)
-	{
-		ErrorMessage errorMessage = new ErrorMessage();
-		
-		errorMessage.setCode("resourcesNotFound");
-		errorMessage.setMessage("Resources requested were not found");
-		errorMessage.setType(ErrorType.ERROR);
-		errorMessage.setDescription(ex.getMessage());
-		
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-	}
-	
-	@ExceptionHandler(JsonMappingException.class)
-	public ResponseEntity<ErrorMessage> handlerNotFound(JsonMappingException ex)
-	{
-		ErrorMessage errorMessage = new ErrorMessage();
-		
-		errorMessage.setCode("invalidParameters");
-		errorMessage.setMessage("The parameters given are invalid");
-		errorMessage.setType(ErrorType.ERROR);
-		errorMessage.setDescription(ex.getMessage());
-		
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
 	}
 }

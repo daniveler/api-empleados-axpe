@@ -17,7 +17,7 @@
  * 		modified_date timestamp without time zone
  * */
 
-INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, nif, nickname, department, contract_status, date_of_birth, is_email_verified, entry_date, password)
+INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, identification_document_value, identification_document_type, nickname, department, contract_status, date_of_birth, email_verified, entry_date, password)
 VALUES
 	(nextval('sq_employees'), 
 	'Pepe', 
@@ -26,6 +26,7 @@ VALUES
 	'pepe@axpe.es', 
 	'+34689456123', 
 	'123456789J', 
+	'NIF',
 	'admin', 
 	'DEVELOPMENT',
 	'INDEFINITE', 
@@ -34,7 +35,7 @@ VALUES
 	CURRENT_TIMESTAMP, 
 	'$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe');
 
-INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, nif, nickname, department, contract_status, date_of_birth, is_email_verified, entry_date, password)
+INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, identification_document_value, identification_document_type, nickname, department, contract_status, date_of_birth, email_verified, entry_date, password)
 VALUES
 	(nextval('sq_employees'), 
 	'Sandra', 
@@ -43,6 +44,7 @@ VALUES
 	'sandra@axpe.es', 
 	NULL, 
 	'223456789J', 
+	'NIF',
 	'sandra', 
 	'DEVELOPMENT',
 	'INDEFINITE', 
@@ -51,7 +53,7 @@ VALUES
 	CURRENT_TIMESTAMP, 
 	'$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe');
 
-INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, nif, nickname, department, contract_status, date_of_birth, is_email_verified, entry_date, password)
+INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, identification_document_value, identification_document_type, nickname, department, contract_status, date_of_birth, email_verified, entry_date, password)
 VALUES
 	(nextval('sq_employees'), 
 	'Antonio', 
@@ -60,6 +62,7 @@ VALUES
 	'antonio@axpe.es', 
 	'+34689456153', 
 	'323456789J', 
+	'NIF',
 	'antonio', 
 	'DEVELOPMENT',
 	'INDEFINITE', 
@@ -68,7 +71,7 @@ VALUES
 	CURRENT_TIMESTAMP, 
 	'$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe');
 
-INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, nif, nickname, department, contract_status, date_of_birth, is_email_verified, entry_date, password)
+INSERT INTO employees (employee_id, first_name, surname1, surname2, email, phone_number, identification_document_value, identification_document_type, nickname, department, contract_status, date_of_birth, email_verified, entry_date, password)
 VALUES
 	(nextval('sq_employees'), 
 	'Sara', 
@@ -76,7 +79,8 @@ VALUES
 	'Cuadrado', 
 	'sara@axpe.es', 
 	'+34689456126', 
-	'423456789J', 
+	'423456789J',
+	'NIF',
 	'sara', 
 	'DEVELOPMENT',
 	'INDEFINITE', 
