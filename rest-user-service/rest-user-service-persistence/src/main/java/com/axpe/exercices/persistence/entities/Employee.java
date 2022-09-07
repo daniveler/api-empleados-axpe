@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 public class Employee
 {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_employees")
+	@SequenceGenerator(name = "sq_employees", sequenceName = "sq_employees", allocationSize = 1)
 	private Long employeeId;
 	
 	private String firstName;
