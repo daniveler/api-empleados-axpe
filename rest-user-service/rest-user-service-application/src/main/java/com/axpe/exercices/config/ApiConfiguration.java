@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.axpe.exercices.service.EmployeeService;
+
 @Configuration
 public class ApiConfiguration
 {
@@ -31,3 +33,4 @@ public class ApiConfiguration
 		return new ModelMapper();
 	}
 }
+

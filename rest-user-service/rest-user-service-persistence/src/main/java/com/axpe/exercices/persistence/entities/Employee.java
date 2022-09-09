@@ -20,6 +20,7 @@ import com.axpe.exercices.persistence.enums.IdentificationDocumentType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data @NoArgsConstructor @AllArgsConstructor
 @Entity @Table(name = "employees")
@@ -28,20 +29,20 @@ public class Employee
 {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_employees")
 	@SequenceGenerator(name = "sq_employees", sequenceName = "sq_employees", allocationSize = 1)
-	private Long employeeId;
 	
-	private String firstName;
+	@NonNull private Long employeeId;
+	@NonNull private String firstName;
 	private String surname1;
 	private String surname2;
 	private String email;
 	private String phoneNumber;
-	private String identificationDocumentValue;
+	@NonNull private String identificationDocumentValue;
 	
-	@Enumerated(EnumType.STRING)
+	@NonNull @Enumerated(EnumType.STRING)
 	private IdentificationDocumentType identificationDocumentType;
 	
-	private String nickname;
-	private String password;
+	@NonNull private String nickname;
+	@NonNull private String password;
 	
 	@Enumerated(EnumType.STRING)
 	private Department department;
