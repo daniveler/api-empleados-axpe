@@ -13,15 +13,4 @@ public class ResponseBodyMessage
 {
 	private List <EmployeeDTO> data;
 	private Pagination pagination;
-	
-	@Data @NoArgsConstructor @AllArgsConstructor
-	private class Pagination
-	{
-		private int offset;
-		private int limit;
-		private int pageNumber;
-		private int totalPages;
-		private int totalElements;
-		private String[] links;
-	}
 }

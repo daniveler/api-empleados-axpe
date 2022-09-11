@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.persistence.criteria.CriteriaBuilder.Case;
 
 import org.springframework.http.HttpHeaders;
 
@@ -22,9 +19,10 @@ import com.axpe.exercices.persistence.enums.Department;
 import com.axpe.exercices.persistence.repository.EmployeeRepository;
 import com.axpe.exercices.service.dto.EmployeeDTO;
 import com.axpe.exercices.service.enums.FilterTypes;
+import com.axpe.exercices.service.enums.FilterTypesExceptions;
 import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
-import com.jayway.jsonpath.Predicate;
+import com.axpe.exercises.service.exceptions.GetAllFilterException;
 
 import lombok.NoArgsConstructor;
 
@@ -37,60 +35,19 @@ public class EmployeeService
 	@Autowired private EmployeeDTOMapper employeeDTOMapper;
 	
 	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, String paginationLimit, String paginationOffset)
-	{
-		List<Employee> employeesList = employeeRepository.findAll();
-		List<Employee> filtredList = new ArrayList<>();
-		
+	{	
 		ResponseBodyMessage response = new ResponseBodyMessage();
-				
-		switch (FilterTypes.valueOf(filterBy.toUpperCase()))
-		{
-			case NAME:
-			{
-				filtredList = employeesList.stream()
-					.filter(employee -> employee.getFirstName().toUpperCase().equals(filterValue.toUpperCase()))
-					.collect(Collectors.toList());
-				
-				break;
-			}
-			case IDENTIFICATIONDOCUMENT:
-			{
-				filtredList = employeesList.stream()
-						.filter(employee -> employee.getIdentificationDocumentValue().toUpperCase() == filterValue.toUpperCase())
-						.collect(Collectors.toList());
-				
-				break;
-			}
-			case DEPARTMENT:
-			{
-				filtredList = employeesList.stream()
-						.filter(employee -> employee.getDepartment() == Department.valueOf(filterValue.toUpperCase()))
-						.collect(Collectors.toList());
-				
-				break;
-			}
-			case CONTRACTSTATUS:
-			{
-				filtredList = employeesList.stream()
-						.filter(employee -> employee.getContractStatus() == ContractStatus.valueOf(filterValue.toUpperCase()))
-						.collect(Collectors.toList());
-				
-				break;
-			}
-			case NONE:
-			{
-				filtredList = employeesList;
-				
-				break;
-			}
-			default:
-				// Lanzar excepción de parámetros de filtrado inválidos
-				break;
-		}
+		
+		List<Employee> employeesList = employeeRepository.findAll();		
+		List<Employee> filtredList = filterResponse(employeesList, filterBy, filterValue);
+		
+		Pagination pagination = new Pagination();
 		
 		response.setData(filtredList.stream()
 				.map(employeeDTOMapper::convertToDto)
 				.collect(Collectors.toList()));
+		
+		response.setPagination(pagination);
 		
 		return response;
 		
@@ -160,5 +117,93 @@ public class EmployeeService
 			.orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 		
 		employeeRepository.deleteById(employeeId);
+	}
+	
+	public List<Employee> filterResponse(List<Employee> employeesList, String filterBy, String filterValue) 
+	{
+		List<Employee> filtredList = new ArrayList<>();
+
+		if(filterBy.isEmpty()) 
+		{
+			throw new GetAllFilterException(FilterTypesExceptions.EMPTYFILTERTYPE, filterBy, filterValue);
+		}
+		else if(filterValue.isEmpty() && !filterBy.toUpperCase().equals("NONE")) 
+		{
+			try { FilterTypes.valueOf(filterBy.toUpperCase()); } 
+			catch (Exception e)
+			{
+				throw new GetAllFilterException(FilterTypesExceptions.WRONGFILTERTYPE, filterBy, filterValue);
+			}
+			
+			throw new GetAllFilterException(FilterTypesExceptions.EMPTYFILTERVALUE, filterBy, filterValue);
+		}
+		
+		switch (FilterTypes.valueOf(filterBy.toUpperCase()))
+		{
+			case NAME:
+			{
+				filtredList = employeesList.stream()
+					.filter(employee -> employee.getFirstName().toUpperCase().equals(filterValue.toUpperCase()))
+					.collect(Collectors.toList());
+				
+				break;
+			}
+			case IDENTIFICATIONDOCUMENT:
+			{
+				filtredList = employeesList.stream()
+						.filter(employee -> employee.getIdentificationDocumentValue().toUpperCase() == filterValue.toUpperCase())
+						.collect(Collectors.toList());
+				
+				break;
+			}
+			case DEPARTMENT:
+			{
+				try
+				{
+					filtredList = employeesList.stream()
+							.filter(employee -> employee.getDepartment() == Department.valueOf(filterValue.toUpperCase()))
+							.collect(Collectors.toList());
+				} catch (Exception e)
+				{
+					throw new GetAllFilterException(FilterTypesExceptions.OTHERS, filterBy, filterValue);
+				}
+				
+				
+				break;
+			}
+			case CONTRACTSTATUS:
+			{
+				try
+				{
+					filtredList = employeesList.stream()
+							.filter(employee -> employee.getContractStatus() == ContractStatus.valueOf(filterValue.toUpperCase()))
+							.collect(Collectors.toList());
+				} 
+				catch (Exception e)
+				{
+					throw new GetAllFilterException(FilterTypesExceptions.OTHERS, filterBy, filterValue);
+				}
+				
+				
+				break;
+			}
+			case NONE:
+			{
+				filtredList = employeesList;
+				
+				break;
+			}
+			default:
+				// Lanzar excepción de parámetros de filtrado inválidos
+				break;
+		}
+		
+		return filtredList;
+		
+	}
+	
+	public void paginateResponse() 
+	{
+		
 	}
 }

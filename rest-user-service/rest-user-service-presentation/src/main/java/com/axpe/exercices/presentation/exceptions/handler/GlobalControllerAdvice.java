@@ -9,11 +9,25 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.ErrorMessage;
+import com.axpe.exercises.service.exceptions.GetAllFilterException;
 import com.axpe.exercices.persistence.enums.ErrorType;
 
 @RestControllerAdvice
 public class GlobalControllerAdvice extends ResponseEntityExceptionHandler
 {
+	// 400 Bad Request
+	@ExceptionHandler(GetAllFilterException.class)
+	public ResponseEntity<ErrorMessage> handlerNotFound(GetAllFilterException ex)
+	{
+		ErrorMessage errorMessage = new ErrorMessage(
+				"filterException",
+				"Filter sent is not valid",
+				ErrorType.ERROR,
+				ex.getMessage());
+		
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	}
+		
 	// 404 Not Found
 	@ExceptionHandler(EmployeeNotFoundException.class)
 	public ResponseEntity<ErrorMessage> handlerNotFound(EmployeeNotFoundException ex)

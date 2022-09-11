@@ -31,11 +31,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmployeeController
 {
-//	@Autowired
-//	private final EmployeeRepository employeeRepository;
-//	
-//	private final EmployeeDTOMapper employeeDTOMapper;
-//	
 	@Autowired
 	private final EmployeeService employeeService;
 
