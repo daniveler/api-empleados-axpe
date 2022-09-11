@@ -1,5 +1,7 @@
 package com.axpe.exercices.presentation.controllers;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +11,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.axpe.exercices.persistence.entities.Employee;
 import com.axpe.exercices.service.EmployeeService;
 import com.axpe.exercices.service.dto.EmployeeDTO;
+import com.axpe.exercices.service.enums.FilterTypes;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,9 +40,14 @@ public class EmployeeController
 	private final EmployeeService employeeService;
 
 	@GetMapping("/employees")
-	public ResponseEntity<?> getAll()
+	public ResponseEntity<?> getAll(
+			@RequestParam String filterBy,
+			@RequestParam(required = false) String filterValue,
+			@RequestParam(required = false) String paginationLimit,
+			@RequestParam(required = false) String paginationOffset
+			)
 	{
-		return ResponseEntity.ok(employeeService.getAllEmployees());
+		return ResponseEntity.ok(employeeService.getAllEmployees(filterBy, filterValue, paginationLimit, paginationOffset));
 	}
 
 	@GetMapping("/employees/{employeeId}")
@@ -56,12 +69,12 @@ public class EmployeeController
 		employeeService.postOneEmployee(newEmployee);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-
-	@PostMapping("/employees/validate-email")
-	public ResponseEntity<?> validateEmail(@RequestParam String email)
+	
+	@GetMapping("/employees/validate-email")
+	public Object validateEmail(@RequestParam String email) throws IOException
 	{
-		employeeService.validateEmail(email);
-		return ResponseEntity.ok().build();
+		Object object = employeeService.validateEmail(email);
+		return object;
 	}
 
 	@DeleteMapping("/employees/{employeeId}")

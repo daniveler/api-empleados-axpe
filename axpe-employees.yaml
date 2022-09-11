@@ -45,7 +45,7 @@ paths:
           name: identificationDocumentValue
           in: query
           required: false
-          description: Filter for searching employees by NIF
+          description: Filter for searching employees by identification document value
 
         - schema:
             type: string
