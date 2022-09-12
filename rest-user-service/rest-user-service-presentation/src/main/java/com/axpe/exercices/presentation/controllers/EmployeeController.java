@@ -68,8 +68,7 @@ public class EmployeeController
 	@GetMapping("/employees/validate-email")
 	public Object validateEmail(@RequestParam String email) throws IOException
 	{
-		Object object = employeeService.validateEmail(email);
-		return object;
+		return employeeService.validateEmail(email);
 	}
 
 	@DeleteMapping("/employees/{employeeId}")

@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
 import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -38,21 +41,27 @@ public class EmployeeService
 	
 	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
 	{			
-		List<Employee> employeesList = employeeRepository.findAll();		
-		List<Employee> filtredList = filterResponse(employeesList, filterBy, filterValue);
+//		List<Employee> employeesList = employeeRepository.findAll();
+//		List<Employee> filtredList = filterResponse(employeesList, filterBy, filterValue);
+//		
+//		if(filtredList.isEmpty()) 
+//		{
+//			throw new GetAllNoContentException();
+//		}
+//		
+//		ResponseBodyMessage response = paginateResponse(filterBy, filterValue, paginationLimit, paginationOffset, filtredList);
+//		
+//		return response;
 		
-		if(filtredList.isEmpty()) 
-		{
-			throw new GetAllNoContentException();
-		}
+		if(paginationLimit == null || paginationLimit <= 0) { paginationLimit = 10; }
+		else if(paginationLimit > 50) { paginationLimit = 50; }
 		
-		ResponseBodyMessage response = paginateResponse(filterBy, filterValue, paginationLimit, paginationOffset, filtredList);
-				
+		if (paginationOffset == null) { paginationOffset = 0; } 
+		else if(paginationOffset < 0) { throw new PaginationException(paginationOffset); }
 		
-		
-		return response;
+		return filterAndPaginateResponse(filterBy, filterValue, paginationLimit, paginationOffset);
 	}
-	
+
 	public EmployeeDTO getOneEmployee(Long employeeId)
 	{
 		Employee employee = employeeRepository.findById(employeeId)
@@ -296,10 +305,76 @@ public class EmployeeService
 				.map(employeeDTOMapper::convertToDto)
 				.collect(Collectors.toList());
 		
-		ResponseBodyMessage response = new ResponseBodyMessage(data, pagination);
+		//ResponseBodyMessage response = new ResponseBodyMessage(data, pagination);
+		
+		//return response;
+		return null;
+	}
+	
+	private ResponseBodyMessage filterAndPaginateResponse(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
+	{
+		ResponseBodyMessage response = new ResponseBodyMessage();
+		
+		Pageable paging = PageRequest.of(paginationOffset, paginationLimit);
+		
+		Page<Employee> responsePage;
+		
+		if(filterValue == null) { filterValue = ""; }
+		
+		switch (FilterTypes.valueOf(filterBy.toUpperCase()))
+		{
+			case NAME: 
+				responsePage = employeeRepository.findByFirstName(filterValue, paging); 
+				break;
+
+			case IDENTIFICATIONDOCUMENT:
+				responsePage = employeeRepository.findByIdentificationDocumentValue(filterValue, paging);
+				break;
+				
+			case DEPARTMENT:
+				try
+				{
+					responsePage = employeeRepository.findByDepartment(Department.valueOf(filterValue), paging);
+				} 
+				catch (Exception e)
+				{
+					throw new GetAllFilterException(FilterTypesExceptions.OTHERS, filterBy, filterValue);
+				}
+	
+				break;
+			case CONTRACTSTATUS:
+				try
+				{
+					responsePage = employeeRepository.findByContractStatus(ContractStatus.valueOf(filterValue), paging);
+				} 
+				catch (Exception e)
+				{
+					throw new GetAllFilterException(FilterTypesExceptions.OTHERS, filterBy, filterValue);
+				}
+				
+				break;
+			case NONE:
+				responsePage = employeeRepository.findAll(paging);
+				break;
+			default:
+				responsePage = employeeRepository.findAll(paging);
+				break;
+		}
+		
+		response.setData(responsePage.getContent());
+		Pagination pagination = new Pagination();
+		
+		pagination.setPageNumber(responsePage.getNumber() + 1);
+		pagination.setTotalPages(responsePage.getTotalPages());
+		pagination.setTotalElements((int)responsePage.getTotalElements());
+		pagination.setOffset(paginationOffset);
+		pagination.setLimit(paginationLimit);
+		
+		response.setPagination(pagination);
 		
 		return response;
 	}
+
 }
 
 

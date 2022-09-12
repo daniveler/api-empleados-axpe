@@ -19,7 +19,12 @@ CREATE TABLE employees (
     contract_status enum('INDEFINITE', 'TRAINEE', 'TEMPORAL'),
     date_of_birth date,
     email_verified boolean NOT NULL,
-    entry_date timestamp without time zone NOT NULL,
+    
+--    entry_date bigint,
+--    cancel_date bigint,
+--    modified_date bigint
+    
+    entry_date timestamp without time zone,
     cancel_date timestamp without time zone,
     modified_date timestamp without time zone
 );
