@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
-
+import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -23,6 +23,8 @@ import com.axpe.exercices.service.enums.FilterTypesExceptions;
 import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.GetAllFilterException;
+import com.axpe.exercises.service.exceptions.GetAllNoContentException;
+import com.axpe.exercises.service.exceptions.PaginationException;
 
 import lombok.NoArgsConstructor;
 
@@ -34,23 +36,21 @@ public class EmployeeService
 	@Autowired private EmployeeRepository employeeRepository;
 	@Autowired private EmployeeDTOMapper employeeDTOMapper;
 	
-	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, String paginationLimit, String paginationOffset)
-	{	
-		ResponseBodyMessage response = new ResponseBodyMessage();
-		
+	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
+	{			
 		List<Employee> employeesList = employeeRepository.findAll();		
 		List<Employee> filtredList = filterResponse(employeesList, filterBy, filterValue);
 		
-		Pagination pagination = new Pagination();
+		if(filtredList.isEmpty()) 
+		{
+			throw new GetAllNoContentException();
+		}
 		
-		response.setData(filtredList.stream()
-				.map(employeeDTOMapper::convertToDto)
-				.collect(Collectors.toList()));
+		ResponseBodyMessage response = paginateResponse(filterBy, filterValue, paginationLimit, paginationOffset, filtredList);
+				
 		
-		response.setPagination(pagination);
 		
 		return response;
-		
 	}
 	
 	public EmployeeDTO getOneEmployee(Long employeeId)
@@ -127,7 +127,7 @@ public class EmployeeService
 		{
 			throw new GetAllFilterException(FilterTypesExceptions.EMPTYFILTERTYPE, filterBy, filterValue);
 		}
-		else if(filterValue.isEmpty() && !filterBy.toUpperCase().equals("NONE")) 
+		else if((filterValue == null || filterValue.isEmpty()) && !filterBy.toUpperCase().equals("NONE")) 
 		{
 			try { FilterTypes.valueOf(filterBy.toUpperCase()); } 
 			catch (Exception e)
@@ -194,7 +194,6 @@ public class EmployeeService
 				break;
 			}
 			default:
-				// Lanzar excepción de parámetros de filtrado inválidos
 				break;
 		}
 		
@@ -202,8 +201,111 @@ public class EmployeeService
 		
 	}
 	
-	public void paginateResponse() 
+	public ResponseBodyMessage paginateResponse(String filterBy, String filterValue, Integer limit, Integer offset, List<Employee> filtredList) 
 	{
+		Pagination pagination = new Pagination();
 		
+		if(limit == null || limit <= 0) { limit = 10; }
+		else if(limit > 50) { limit = 50; }
+		
+		if (offset == null) { offset = 0; } 
+		else if(offset < 0 || offset >= filtredList.size()) { throw new PaginationException(offset); }
+		
+		if(filterValue == null) { filterValue = ""; }
+		
+		int totalElements = filtredList.size();
+		int totalPages = (int) Math.ceil(Double.valueOf(totalElements)/ Double.valueOf(limit));
+		int pageNumber = 1;
+		
+		pagination.setLimit(limit);
+		pagination.setOffset(offset);
+		pagination.setTotalElements(totalElements);
+		pagination.setTotalPages(totalPages);
+		pagination.setPageNumber(pageNumber);
+		
+		//List<List<Employee>> pagesList = com.google.common.collect.Lists.partition(filtredList, limit);
+		
+		String first = "http://localhost:8080/rest-user-service/employees/" 
+				+ "?filterBy=" + filterBy 
+				+ "&filterValue=" + filterValue 
+				+ "&paginationLimit=" + limit
+				+ "&paginationOffset=" + 0;
+		
+		String prev = "";
+		if (pageNumber > 1)
+		{
+			prev = "http://localhost:8080/rest-user-service/employees/" 
+				+ "?filterBy=" + filterBy 
+				+ "&filterValue=" + filterValue 
+				+ "&paginationLimit=" + limit
+				+ "&paginationOffset=" + (offset - limit);
+		}
+		
+		String self = "http://localhost:8080/rest-user-service/employees/" 
+				+ "?filterBy=" + filterBy 
+				+ "&filterValue=" + filterValue 
+				+ "&paginationLimit=" + limit
+				+ "&paginationOffset=" + offset;
+		
+		String next = "";
+				
+		if (pageNumber != totalPages) 
+		{
+			next = "http://localhost:8080/rest-user-service/employees/" 
+					+ "?filterBy=" + filterBy 
+					+ "&filterValue=" + filterValue 
+					+ "&paginationLimit=" + limit
+					+ "&paginationOffset=" + (offset + limit);
+		}
+		
+		String last = "";
+		
+		if(totalPages == 1) { last = first; }
+		if(pageNumber == totalPages) { last = self; }
+		else if(totalElements - limit >= 0)
+		{
+			last = "http://localhost:8080/rest-user-service/employees/" 
+					+ "?filterBy=" + filterBy 
+					+ "&filterValue=" + filterValue 
+					+ "&paginationLimit=" + limit 
+					+ "&paginationOffset=" + (totalElements - limit);
+		}
+			
+		
+		PaginationLinks links = new PaginationLinks(first, prev, self,  next, last);
+		pagination.setLinks(links);
+		
+		List<Employee> resultList;
+//		if(offset > 0) 
+//		{ 
+//			int fromIndex = offset - 1;
+//			int toIndex = fromIndex + limit;
+//			
+//			if(totalElements < limit) 
+//			{
+//				
+//			}
+//			
+//			resultList = filtredList.subList(fromIndex, toIndex);
+//		}
+//		else { resultList = filtredList; }
+		
+		resultList = filtredList;
+		
+		List<EmployeeDTO> data = resultList.stream()
+				.map(employeeDTOMapper::convertToDto)
+				.collect(Collectors.toList());
+		
+		ResponseBodyMessage response = new ResponseBodyMessage(data, pagination);
+		
+		return response;
 	}
 }
+
+
+
+
+
+
+
+

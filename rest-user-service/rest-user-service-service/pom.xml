@@ -21,6 +21,14 @@
 			<groupId>com.axpe.exercices</groupId>
 			<artifactId>rest-user-service-persistence</artifactId>
 		</dependency>
+		
+		<!-- Lists by Guava -->
+<!-- 		<dependency> -->
+<!-- 		  <groupId>com.google.guava</groupId> -->
+<!-- 		  <artifactId>guava</artifactId> -->
+<!-- 		  <version>31.1-jre</version> -->
+<!-- 		</dependency> -->
+		
 		<dependency>
 			<groupId>com.axpe.exercices</groupId>
 			<artifactId>rest-user-service-util</artifactId>

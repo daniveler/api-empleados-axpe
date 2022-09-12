@@ -1,7 +1,5 @@
 package com.axpe.exercises.service.exceptions;
 
-import java.util.Map;
-
 import com.axpe.exercices.service.enums.FilterTypesExceptions;
 
 public class GetAllFilterException extends RuntimeException

@@ -12,5 +12,5 @@ public class Pagination
 	private int pageNumber;
 	private int totalPages;
 	private int totalElements;
-	private String[] links;
+	private PaginationLinks links;
 }

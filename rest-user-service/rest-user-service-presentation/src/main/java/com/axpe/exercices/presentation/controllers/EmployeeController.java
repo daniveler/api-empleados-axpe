@@ -38,8 +38,8 @@ public class EmployeeController
 	public ResponseEntity<?> getAll(
 			@RequestParam String filterBy,
 			@RequestParam(required = false) String filterValue,
-			@RequestParam(required = false) String paginationLimit,
-			@RequestParam(required = false) String paginationOffset
+			@RequestParam(required = false) Integer paginationLimit,
+			@RequestParam(required = false) Integer paginationOffset
 			)
 	{
 		return ResponseEntity.ok(employeeService.getAllEmployees(filterBy, filterValue, paginationLimit, paginationOffset));

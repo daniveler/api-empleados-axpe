@@ -10,11 +10,20 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.ErrorMessage;
 import com.axpe.exercises.service.exceptions.GetAllFilterException;
+import com.axpe.exercises.service.exceptions.GetAllNoContentException;
+import com.axpe.exercises.service.exceptions.PaginationException;
 import com.axpe.exercices.persistence.enums.ErrorType;
 
 @RestControllerAdvice
 public class GlobalControllerAdvice extends ResponseEntityExceptionHandler
 {
+	// 204 No Content
+	@ExceptionHandler(GetAllNoContentException.class)
+	public ResponseEntity<ErrorMessage> handlerNotFound(GetAllNoContentException ex)
+	{
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+	
 	// 400 Bad Request
 	@ExceptionHandler(GetAllFilterException.class)
 	public ResponseEntity<ErrorMessage> handlerNotFound(GetAllFilterException ex)
@@ -27,13 +36,25 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler
 		
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
 	}
+	
+	@ExceptionHandler(PaginationException.class)
+	public ResponseEntity<ErrorMessage> handlerNotFound(PaginationException ex)
+	{
+		ErrorMessage errorMessage = new ErrorMessage(
+				"paginationException",
+				"Pagination parameters sent are not valid",
+				ErrorType.ERROR,
+				ex.getMessage());
+		
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	}
 		
 	// 404 Not Found
 	@ExceptionHandler(EmployeeNotFoundException.class)
 	public ResponseEntity<ErrorMessage> handlerNotFound(EmployeeNotFoundException ex)
 	{
 		ErrorMessage errorMessage = new ErrorMessage(
-				"resourcesNotFound",
+				"resourcesNotFoundException",
 				"Resources requested were not found",
 				ErrorType.ERROR,
 				ex.getMessage());
@@ -46,8 +67,8 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler
 			HttpStatus status, WebRequest request)
 	{
 		ErrorMessage errorMessage = new ErrorMessage(
-				null,
-				null,
+				"genericException",
+				"The exception is defined in description field",
 				ErrorType.ERROR,
 				ex.getMessage());
 		
