@@ -2,18 +2,20 @@ package com.axpe.exercices.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
-import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.axpe.exercices.persistence.entities.Employee;
@@ -24,12 +26,14 @@ import com.axpe.exercices.service.dto.EmployeeDTO;
 import com.axpe.exercices.service.enums.FilterTypes;
 import com.axpe.exercices.service.enums.FilterTypesExceptions;
 import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
+import com.axpe.exercises.service.classes.email_validation.EmailValidationResponse;
+import com.axpe.exercises.service.exceptions.EmailValidationException;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.GetAllFilterException;
-import com.axpe.exercises.service.exceptions.GetAllNoContentException;
 import com.axpe.exercises.service.exceptions.PaginationException;
 
 import lombok.NoArgsConstructor;
+
 
 @Service
 @NoArgsConstructor
@@ -40,19 +44,7 @@ public class EmployeeService
 	@Autowired private EmployeeDTOMapper employeeDTOMapper;
 	
 	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
-	{			
-//		List<Employee> employeesList = employeeRepository.findAll();
-//		List<Employee> filtredList = filterResponse(employeesList, filterBy, filterValue);
-//		
-//		if(filtredList.isEmpty()) 
-//		{
-//			throw new GetAllNoContentException();
-//		}
-//		
-//		ResponseBodyMessage response = paginateResponse(filterBy, filterValue, paginationLimit, paginationOffset, filtredList);
-//		
-//		return response;
-		
+	{					
 		if(paginationLimit == null || paginationLimit <= 0) { paginationLimit = 10; }
 		else if(paginationLimit > 50) { paginationLimit = 50; }
 		
@@ -99,25 +91,55 @@ public class EmployeeService
 		employeeRepository.save(employee);
 	}
 	
-	public Object validateEmail(String email) throws IOException 
+	public boolean validateEmail(String email) 
 	{	
-		final String url = "https://global-email-v4.p.rapidapi.com/v4/WEB/GlobalEmail/doGlobalEmail?"
-				+ "email=" + email 
-				+ "&opt=VerifyMailbox:Express|VerifyMailbox:ExpressPremium&"
-				+ "format=json";
+		final String url = "https://api.tomba.io/v1/email-verifier/" + email;
 		
 		HttpHeaders headers = new HttpHeaders();
 		
-		headers.set("X-RapidAPI-Key", "9b3c39653emshd4d390317c7cc52p1edca1jsn773aeec76ac2");
-		headers.set("X-RapidAPI-Host", "global-email-v4.p.rapidapi.com");
+		headers.set("content-type", "application/json");
+		headers.set("X-Tomba-Key", "ta_c0a1d9fce1cccff4a134badf434cb1ff2cc79");
+		headers.set("X-Tomba-Secret", "ts_6bd7ca73-aedf-4410-b434-7ef2ad665ff8");
 
 		RestTemplate restTemplate = new RestTemplate();
 		
 		HttpEntity<String> httpEntity = new HttpEntity<>("some body", headers);
 		
-		Object responseObject = restTemplate.exchange(url, HttpMethod.GET, httpEntity, Object.class);
+		EmailValidationResponse emailValidationResponse;
+		ResponseEntity<EmailValidationResponse> responseEntity;
+						
+		try 
+		{
+			responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, EmailValidationResponse.class);
+			emailValidationResponse = responseEntity.getBody();
+			
+			List<String> validStatusList = Arrays.asList("VALID", "ACCEPT_ALL", "WEBMAIL", "DISPOSABLE");
+			
+			String status = emailValidationResponse.getData().getEmailAttributes().getStatus();
+			boolean regex = emailValidationResponse.getData().getEmailAttributes().isRegex();
+			
+			if(regex && validStatusList.contains(status.toUpperCase())) 
+			{
+				Employee employee = employeeRepository.findByEmail(email);
 				
-		return responseObject;
+				if(employee != null) 
+				{
+					employee.setEmailVerified(true);
+					
+					employeeRepository.save(employee);
+					
+					return true;
+				}
+				else return false;
+				
+			}
+			else return false;
+			
+			
+		}
+		catch (HttpClientErrorException e) {
+			throw new EmailValidationException(email);
+		}
 	}
 	
 	public void deleteOneEmployee(Long employeeId) 

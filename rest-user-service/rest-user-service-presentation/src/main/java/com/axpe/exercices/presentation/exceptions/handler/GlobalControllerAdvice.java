@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.axpe.exercises.service.exceptions.EmailValidationException;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.ErrorMessage;
 import com.axpe.exercises.service.exceptions.GetAllFilterException;
@@ -43,6 +45,18 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler
 		ErrorMessage errorMessage = new ErrorMessage(
 				"paginationException",
 				"Pagination parameters sent are not valid",
+				ErrorType.ERROR,
+				ex.getMessage());
+		
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	}
+	
+	@ExceptionHandler(EmailValidationException.class)
+	public ResponseEntity<ErrorMessage> handlerNotFound(EmailValidationException ex)
+	{
+		ErrorMessage errorMessage = new ErrorMessage(
+				"emailVerificationException",
+				"Email sent is not valid",
 				ErrorType.ERROR,
 				ex.getMessage());
 		

@@ -23,6 +23,8 @@ import com.axpe.exercices.persistence.entities.Employee;
 import com.axpe.exercices.service.EmployeeService;
 import com.axpe.exercices.service.dto.EmployeeDTO;
 import com.axpe.exercices.service.enums.FilterTypes;
+import com.axpe.exercises.service.classes.email_validation.EmailAttributes;
+import com.axpe.exercises.service.classes.email_validation.EmailValidationResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,9 +68,13 @@ public class EmployeeController
 	}
 	
 	@GetMapping("/employees/validate-email")
-	public Object validateEmail(@RequestParam String email) throws IOException
+	public ResponseEntity<?> validateEmail(@RequestParam String email)
 	{
-		return employeeService.validateEmail(email);
+		if (employeeService.validateEmail(email))
+			return ResponseEntity.noContent().build();
+		else 
+			return ResponseEntity.notFound().build();
+		
 	}
 
 	@DeleteMapping("/employees/{employeeId}")
