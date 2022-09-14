@@ -10,13 +10,13 @@ import com.axpe.exercices.persistence.enums.Department;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long>
 {
-	Page<Employee> findByFirstName(String firstName, Pageable pageable);
+	Page<Employee> findByFirstNameIgnoreCase(String firstName, Pageable pageable);
 
-	Page<Employee> findByDepartment(Department department, Pageable pageable);
+	Page<Employee> findByDepartmentIgnoreCase(Department department, Pageable pageable);
 
-	Page<Employee> findByContractStatus(ContractStatus contractStatus, Pageable pageable);
+	Page<Employee> findByContractStatusIgnoreCase(ContractStatus contractStatus, Pageable pageable);
 
-	Page<Employee> findByIdentificationDocumentValue(String identificationDocumentValue, Pageable pageable);
+	Page<Employee> findByIdentificationDocumentValueIgnoreCase(String identificationDocumentValue, Pageable pageable);
 	
 	Employee findByEmail(String email);
 }

@@ -17,7 +17,7 @@ public class GetAllFilterException extends RuntimeException
 			case WRONGFILTERTYPE:
 				return "Field filterType is invalid. Must be: NAME, IDENTIFICATIONDOCUMENT, DEPARTMENT, CONTRACTSTATUS or NONE";
 			case OTHERS:
-				return "Filter type: " + filterType + " with value = " + filterValue + "is not valid";
+				return "Filter type: " + filterType + " with value = " + filterValue + " is not valid";
 			default:
 				return "";
 		}

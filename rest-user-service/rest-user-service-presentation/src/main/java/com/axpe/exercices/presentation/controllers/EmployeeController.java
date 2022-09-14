@@ -38,7 +38,7 @@ public class EmployeeController
 
 	@GetMapping("/employees")
 	public ResponseEntity<?> getAll(
-			@RequestParam String filterBy,
+			@RequestParam(required = false) String filterBy,
 			@RequestParam(required = false) String filterValue,
 			@RequestParam(required = false) Integer paginationLimit,
 			@RequestParam(required = false) Integer paginationOffset
