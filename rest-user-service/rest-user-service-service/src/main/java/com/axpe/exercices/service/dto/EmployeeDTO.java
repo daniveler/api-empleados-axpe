@@ -2,16 +2,17 @@ package com.axpe.exercices.service.dto;
 
 import java.sql.Date;
 
-import com.axpe.exercices.persistence.entities.IdentificationDocument;
 import com.axpe.exercices.persistence.enums.ContractStatus;
 import com.axpe.exercices.persistence.enums.Department;
 import com.axpe.exercices.persistence.enums.IdentificationDocumentType;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class EmployeeDTO
 {
 	private Long employeeId;

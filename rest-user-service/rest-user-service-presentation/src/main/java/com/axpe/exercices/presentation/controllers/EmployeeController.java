@@ -1,6 +1,5 @@
 package com.axpe.exercices.presentation.controllers;
 
-import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,20 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.axpe.exercices.persistence.entities.Employee;
 import com.axpe.exercices.service.EmployeeService;
 import com.axpe.exercices.service.dto.EmployeeDTO;
-import com.axpe.exercices.service.enums.FilterTypes;
-import com.axpe.exercises.service.classes.email_validation.EmailAttributes;
-import com.axpe.exercises.service.classes.email_validation.EmailValidationResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,8 +32,7 @@ public class EmployeeController
 			@RequestParam(required = false) String filterBy,
 			@RequestParam(required = false) String filterValue,
 			@RequestParam(required = false) Integer paginationLimit,
-			@RequestParam(required = false) Integer paginationOffset
-			)
+			@RequestParam(required = false) Integer paginationOffset)
 	{
 		return ResponseEntity.ok(employeeService.getAllEmployees(filterBy, filterValue, paginationLimit, paginationOffset));
 	}

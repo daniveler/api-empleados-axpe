@@ -1,13 +1,10 @@
 package com.axpe.exercices.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
-import org.apache.tomcat.util.http.fileupload.impl.IOFileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +30,7 @@ import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 import com.axpe.exercises.service.exceptions.GetAllFilterException;
 import com.axpe.exercises.service.exceptions.PaginationException;
 
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 
@@ -43,6 +41,8 @@ public class EmployeeService
 	
 	@Autowired private EmployeeRepository employeeRepository;
 	@Autowired private EmployeeDTOMapper employeeDTOMapper;
+	
+	public EmployeeService(EmployeeRepository employeeRepository) { this.employeeRepository = employeeRepository; } 
 	
 	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
 	{					
@@ -217,7 +217,12 @@ public class EmployeeService
 				break;
 		}
 		
-		response.setData(responsePage.getContent());
+		List<Employee> listEmployee = responsePage.getContent();
+		List<EmployeeDTO> dataList = listEmployee.stream()
+				.map(e -> employeeDTOMapper.convertToDto(e))
+				.collect(Collectors.toList());
+		
+		response.setData(dataList);
 		Pagination pagination = new Pagination();
 		
 		pagination.setPageNumber(responsePage.getNumber() + 1);
