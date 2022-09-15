@@ -1,24 +1,14 @@
 package com.axpe.exercices;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.intThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.awt.print.Pageable;
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-import javax.accessibility.AccessibleTableModelChange;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import com.axpe.exercices.persistence.entities.Employee;
@@ -37,7 +26,6 @@ import com.axpe.exercices.persistence.repository.EmployeeRepository;
 import com.axpe.exercices.service.EmployeeService;
 import com.axpe.exercices.service.ResponseBodyMessage;
 import com.axpe.exercices.service.dto.EmployeeDTO;
-import com.axpe.exercices.service.enums.FilterTypes;
 import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
 import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 
@@ -185,7 +173,7 @@ class EmployeeServiceTest
 	void testValidateEmailReturnsNoContent()
 	{
 		//Given
-		String email = "daniel01velerdas@gmail.com";
+		String email = "prueba@gmail.com";
 		Employee emp = createEmployee(1L);
 		
 		when(employeeRepository.findByEmail(email)).thenReturn(emp);
@@ -204,7 +192,7 @@ class EmployeeServiceTest
 	void testValidateEmailReturnsNotFoundException()
 	{
 		//Given
-		String email = "daniel01velerdas@gmail.com";
+		String email = "prueba@gmail.com";
 		Employee emp = createEmployee(1L);
 		
 		when(employeeRepository.findByEmail(email)).thenReturn(null);
@@ -219,23 +207,50 @@ class EmployeeServiceTest
 	}
 
 	@Test
-	void testDeleteOneEmployee()
+	@DisplayName("Deletes an employee and returns No Content")
+	void testDeleteOneEmployeeReturnsNoContent()
 	{
-		//fail("Not yet implemented");
+//		Given
+//		Long employeeId = 1L;
+//		Employee emp = createEmployee(employeeId);
+//		
+//		when(employeeRepository.findById(employeeId));
+//		//when(employeeRepository.deleteById(employeeId));
+//		
+//		When
+//		
+//		
+//		Then
+	}
+	
+	@Test
+	@DisplayName("Deletes an employee and returns Employee Not Found Exception")
+	void testDeleteOneEmployeeReturnsEmployeeNotFoundException()
+	{
+		//Given
+		Long employeeId = 1L;
+		
+		when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
+		
+		//When
+		
+		//Then
+		assertThrows(EmployeeNotFoundException.class, () -> this.employeeService.deleteOneEmployee(employeeId));
+		verify(employeeRepository, times(0)).deleteById(employeeId);
 	}
 	
 	Employee createEmployee(Long employeeId) 
 	{
 		Employee employee = new Employee(
 				employeeId, 
-				"Daniel", 
-				"Velerdas", 
-				"Sedano", 
-				"daniel01velerdas@gmail.com", 
+				"Prueba", 
+				"Apellido1", 
+				"Apellido2", 
+				"prueba@gmail.com", 
 				"+34689456123", 
 				"123456789J", 
 				IdentificationDocumentType.NIF, 
-				"daniveler", 
+				"prueba", 
 				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
 				null, 
 				null, 
@@ -243,29 +258,7 @@ class EmployeeServiceTest
 				null, 
 				null, 
 				null, 
-				null);
-		
-//		Employee employee = new Employee();
-		
-//		employee.setEmployeeId(employeeId);
-//		employee.setFirstName("Daniel");
-//		employee.setSurname1("Velerdas");
-//		employee.setSurname2("Sedano");
-//		employee.setEmail("daniel01velerdas@gmail.com");
-//		employee.setPhoneNumber("+34689456123");
-//		employee.setIdentificationDocumentType(IdentificationDocumentType.NIF);
-//		employee.setIdentificationDocumentValue("123456789J");
-//		employee.setNickname("daniveler");
-//		employee.setPassword("$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe");
-//		employee.setDepartment(Department.DEVELOPMENT);
-//		employee.setContractStatus(ContractStatus.INDEFINITE);
-//		employee.setDateOfBirth(Date.valueOf("1995-06-29"));
-//		employee.setEmailVerified(false);
-//		employee.setEntryDate(Date.valueOf("2022-09-02"));
-//		employee.setCancelDate(null);
-//		employee.setModifiedDate(null);
-		
-		
+				null);	
 		
 		return employee;
 	}
@@ -274,14 +267,14 @@ class EmployeeServiceTest
 	{
 		EmployeeDTO employeeDto = new EmployeeDTO(
 				employeeId, 
-				"Daniel", 
-				"Velerdas", 
-				"Sedano", 
-				"daniel01velerdas@gmail.com", 
+				"Prueba", 
+				"Apellido1", 
+				"Apellido2", 
+				"prueba@gmail.com", 
 				"+34689456123", 
 				"123456789J", 
 				IdentificationDocumentType.NIF, 
-				"daniveler", 
+				"prueba", 
 				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
 				null, 
 				null, 
@@ -298,14 +291,14 @@ class EmployeeServiceTest
 	{		
 		Employee employee = new Employee(
 				employeeId, 
-				"Daniel", 
-				"Velerdas", 
-				"Sedano", 
-				"daniel01velerdas@gmail.com", 
+				"Prueba", 
+				"Apellido1", 
+				"Apellido2", 
+				"prueba@gmail.com", 
 				"+34689456123", 
 				"123456789J", 
 				IdentificationDocumentType.NIF, 
-				"daniveler", 
+				"prueba", 
 				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
 				null, 
 				null, 
