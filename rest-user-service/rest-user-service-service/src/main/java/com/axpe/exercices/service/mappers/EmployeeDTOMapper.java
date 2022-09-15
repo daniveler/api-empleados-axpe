@@ -7,6 +7,7 @@ import com.axpe.exercices.persistence.entities.Employee;
 import com.axpe.exercices.service.dto.EmployeeDTO;
 import com.jayway.jsonpath.spi.mapper.MappingException;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Component

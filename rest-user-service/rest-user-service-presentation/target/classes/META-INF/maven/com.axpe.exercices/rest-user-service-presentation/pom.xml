@@ -33,6 +33,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.axpe.exercices</groupId>
+			<artifactId>rest-user-service-util</artifactId>
+		</dependency>
+		
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>

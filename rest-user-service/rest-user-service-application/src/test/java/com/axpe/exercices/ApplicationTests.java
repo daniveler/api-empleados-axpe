@@ -7,10 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
-public class ApplicationTests {
+public class ApplicationTests
+{
 
 	@Test
-	public void contextLoads() {
+	public void contextLoads()
+	{
 	}
 
 }

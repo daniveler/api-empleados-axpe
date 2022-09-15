@@ -1,64 +1,325 @@
 package com.axpe.exercices;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.intThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.awt.print.Pageable;
+import java.sql.Date;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
+import javax.accessibility.AccessibleTableModelChange;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+import com.axpe.exercices.persistence.entities.Employee;
+import com.axpe.exercices.persistence.enums.IdentificationDocumentType;
 import com.axpe.exercices.persistence.repository.EmployeeRepository;
 import com.axpe.exercices.service.EmployeeService;
+import com.axpe.exercices.service.ResponseBodyMessage;
 import com.axpe.exercices.service.dto.EmployeeDTO;
+import com.axpe.exercices.service.enums.FilterTypes;
+import com.axpe.exercices.service.mappers.EmployeeDTOMapper;
+import com.axpe.exercises.service.exceptions.EmployeeNotFoundException;
 
+@ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest
 {
+	@Mock private EmployeeRepository employeeRepository;
+	@Mock private EmployeeDTOMapper employeeDTOMapper;
 	
-	EmployeeRepository employeeRepository;
-	EmployeeService employeeService;
+	@InjectMocks
+	private EmployeeService employeeService = new EmployeeService(employeeRepository, employeeDTOMapper);
 
-	@BeforeEach
-	void setUp() throws Exception
+	@Test
+	@DisplayName("Get all employees filtred by NONE returns paginated list of employees")
+	void testGetAllEmployeesFiltredByNoneReturnsOk()
 	{
-		this.employeeRepository = mock(EmployeeRepository.class);
-		this.employeeService = new EmployeeService(employeeRepository);
+		//Given
+		int paginationOffset = 0;
+		int paginationLimit = 10;
+		
+		org.springframework.data.domain.Pageable paging = PageRequest.of(paginationOffset, paginationLimit);
+		
+		Employee emp1 = createEmployee(1L);
+		Employee emp2 = createEmployee(2L);
+		
+		EmployeeDTO empDto1 = createEmployeeDTO(1L);
+		EmployeeDTO empDto2 = createEmployeeDTO(2L);
+
+//		List<Employee> empList = Arrays.asList(emp1, emp2);
+//		List<EmployeeDTO> empDtoList = Arrays.asList(empDto1, empDto2);
+		
+		//Page<Employee> responsePage = new PageImpl<Employee>(empList);
+		Page<Employee> responsePage = mock(Page.class);
+		
+		lenient().when(employeeRepository.findAll(paging)).thenReturn(responsePage);
+		when(employeeDTOMapper.convertToDto(emp1)).thenReturn(empDto1);
+		when(employeeDTOMapper.convertToDto(emp2)).thenReturn(empDto2);
+		
+		//When
+		ResponseBodyMessage response = this.employeeService.getAllEmployees("NONE", null, 0, 10);
+		
+		//Then
+		assertNotNull(response);
+	}
+	
+	@Test
+	@DisplayName("Get one employee returns the employee")
+	void testGetOneEmployeeReturnsOk()
+	{
+		//Given
+		Long employeeId = 1L;
+		
+		Employee emp = createEmployee(employeeId);
+		EmployeeDTO empDto = createEmployeeDTO(employeeId);
+		Optional<Employee> empOpt = createOptionalEmployee(employeeId);
+		
+		when(employeeRepository.findById(employeeId)).thenReturn(empOpt);
+		when(employeeDTOMapper.convertToDto(emp)).thenReturn(empDto);
+		
+		//When
+		EmployeeDTO resultDto = this.employeeService.getOneEmployee(employeeId);
+		
+		//Then
+		assertNotNull(resultDto);
+		assertEquals(resultDto.getEmployeeId(), empDto.getEmployeeId());
+		verify(employeeRepository, times(1)).findById(employeeId);
 	}
 
 	@Test
-	void testGetAllEmployees()
+	@DisplayName("Get one employee returns Employee Not Found Exception")
+	void testGetOneEmployeeReturnsEmployeeNotFoundException()
 	{
-		fail("Not yet implemented");
+		//Given
+		Long employeeId = 1L;
+		when(this.employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
+		
+		//When
+		
+		//Then
+		assertThrows(EmployeeNotFoundException.class, () -> this.employeeService.getOneEmployee(employeeId));
 	}
 
 	@Test
-	void testGetOneEmployee()
+	@DisplayName("Put one employee returns No Content")
+	void testPutOneEmployeeReturnsNoContent()
 	{
-		//EmployeeDTO employeeDTO = new EmployeeDTO(1L, "Daniel");
-		//when(this.employeeRepository.findById(1L)).thenReturn(employeeDTO);
+		//Given
+		Long employeeId = 1L;
+		Optional<Employee> optEmp = createOptionalEmployee(employeeId);
+		Employee emp = createEmployee(employeeId);		
+		EmployeeDTO newEmpDto = createEmployeeDTO(employeeId);
+		
+		when(employeeRepository.findById(employeeId)).thenReturn(optEmp);
+		lenient().when(employeeDTOMapper.convertToEntity(newEmpDto)).thenReturn(emp);
+		lenient().when(employeeRepository.save(emp)).thenReturn(emp);
+		
+		//When
+		this.employeeService.putOneEmployee(employeeId, newEmpDto);
+		
+		//Then
+		assertNotNull(newEmpDto);
+		verify(employeeRepository, times(1)).findById(employeeId);
+		verify(employeeRepository, times(1)).save(emp);
+		
+	}
+	
+	@Test
+	@DisplayName("Put one employee returns Employee Not Found Exception")
+	void testPutOneEmployeeReturnsEmployeeNotFoundException()
+	{
+		//Given
+		Long employeeId = 1L;
+		Employee emp = createEmployee(employeeId);
+		EmployeeDTO empDto = createEmployeeDTO(employeeId);
+		
+		when(this.employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
+		
+		//When
+		
+		//Then
+		assertThrows(EmployeeNotFoundException.class, () -> this.employeeService.putOneEmployee(employeeId, empDto));
+		verify(employeeRepository, times(0)).save(emp);
 	}
 
 	@Test
-	void testPutOneEmployee()
+	@DisplayName("Post one employee returns Created")
+	void testPostOneEmployeeReturnsCreated()
 	{
-		fail("Not yet implemented");
+		//Given
+		Long employeeId = 1L;
+		Employee emp = createEmployee(employeeId);
+		
+		when(employeeRepository.save(emp)).thenReturn(emp);
+		
+		//When
+		this.employeeService.postOneEmployee(emp);
+		
+		//Then
+		assertNotNull(emp);
+		verify(employeeRepository, times(1)).save(emp);
 	}
 
 	@Test
-	void testPostOneEmployee()
+	@DisplayName("Validates email returns No Content")
+	void testValidateEmailReturnsNoContent()
 	{
-		fail("Not yet implemented");
+		//Given
+		String email = "daniel01velerdas@gmail.com";
+		Employee emp = createEmployee(1L);
+		
+		when(employeeRepository.findByEmail(email)).thenReturn(emp);
+		
+		//When
+		boolean correct = this.employeeService.validateEmail(email);
+		
+		//Then
+		assertTrue(correct);
+		verify(employeeRepository, times(1)).findByEmail(email);
+		verify(employeeRepository, times(1)).save(emp);
 	}
-
+	
 	@Test
-	void testValidateEmail()
+	@DisplayName("Validates email returns Not Found Exception")
+	void testValidateEmailReturnsNotFoundException()
 	{
-		fail("Not yet implemented");
+		//Given
+		String email = "daniel01velerdas@gmail.com";
+		Employee emp = createEmployee(1L);
+		
+		when(employeeRepository.findByEmail(email)).thenReturn(null);
+		
+		//When
+		boolean correct = this.employeeService.validateEmail(email);
+		
+		//Then
+		assertFalse(correct);
+		verify(employeeRepository, times(0)).findByEmail(email);
+		verify(employeeRepository, times(0)).save(emp);	
 	}
 
 	@Test
 	void testDeleteOneEmployee()
 	{
-		fail("Not yet implemented");
+		//fail("Not yet implemented");
+	}
+	
+	Employee createEmployee(Long employeeId) 
+	{
+		Employee employee = new Employee(
+				employeeId, 
+				"Daniel", 
+				"Velerdas", 
+				"Sedano", 
+				"daniel01velerdas@gmail.com", 
+				"+34689456123", 
+				"123456789J", 
+				IdentificationDocumentType.NIF, 
+				"daniveler", 
+				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
+				null, 
+				null, 
+				false, 
+				null, 
+				null, 
+				null, 
+				null);
+		
+//		Employee employee = new Employee();
+		
+//		employee.setEmployeeId(employeeId);
+//		employee.setFirstName("Daniel");
+//		employee.setSurname1("Velerdas");
+//		employee.setSurname2("Sedano");
+//		employee.setEmail("daniel01velerdas@gmail.com");
+//		employee.setPhoneNumber("+34689456123");
+//		employee.setIdentificationDocumentType(IdentificationDocumentType.NIF);
+//		employee.setIdentificationDocumentValue("123456789J");
+//		employee.setNickname("daniveler");
+//		employee.setPassword("$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe");
+//		employee.setDepartment(Department.DEVELOPMENT);
+//		employee.setContractStatus(ContractStatus.INDEFINITE);
+//		employee.setDateOfBirth(Date.valueOf("1995-06-29"));
+//		employee.setEmailVerified(false);
+//		employee.setEntryDate(Date.valueOf("2022-09-02"));
+//		employee.setCancelDate(null);
+//		employee.setModifiedDate(null);
+		
+		
+		
+		return employee;
+	}
+	
+	EmployeeDTO createEmployeeDTO(Long employeeId) 
+	{
+		EmployeeDTO employeeDto = new EmployeeDTO(
+				employeeId, 
+				"Daniel", 
+				"Velerdas", 
+				"Sedano", 
+				"daniel01velerdas@gmail.com", 
+				"+34689456123", 
+				"123456789J", 
+				IdentificationDocumentType.NIF, 
+				"daniveler", 
+				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
+				null, 
+				null, 
+				false, 
+				null, 
+				null, 
+				null, 
+				null);
+		
+		return employeeDto;
+	}
+	
+	Optional<Employee> createOptionalEmployee(Long employeeId) 
+	{		
+		Employee employee = new Employee(
+				employeeId, 
+				"Daniel", 
+				"Velerdas", 
+				"Sedano", 
+				"daniel01velerdas@gmail.com", 
+				"+34689456123", 
+				"123456789J", 
+				IdentificationDocumentType.NIF, 
+				"daniveler", 
+				"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe", 
+				null, 
+				null, 
+				false, 
+				null, 
+				null, 
+				null, 
+				null);
+		
+		employee.setModifiedDate(null);
+		
+		Optional<Employee> employeeOptional = Optional.of(employee);
+		
+		return employeeOptional;
 	}
 
 }

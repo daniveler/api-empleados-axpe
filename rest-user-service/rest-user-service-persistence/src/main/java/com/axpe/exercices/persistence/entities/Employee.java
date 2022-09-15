@@ -37,6 +37,7 @@ import lombok.NonNull;
 @Where(clause = "cancel_date is null")
 public class Employee
 {
+	
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_employees")
 	@SequenceGenerator(name = "sq_employees", sequenceName = "sq_employees", allocationSize = 1)
 	@NonNull private Long employeeId;

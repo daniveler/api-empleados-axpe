@@ -36,14 +36,13 @@ import lombok.NoArgsConstructor;
 
 @Service
 @NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeService
 {
 	
 	@Autowired private EmployeeRepository employeeRepository;
 	@Autowired private EmployeeDTOMapper employeeDTOMapper;
-	
-	public EmployeeService(EmployeeRepository employeeRepository) { this.employeeRepository = employeeRepository; } 
-	
+		
 	public ResponseBodyMessage getAllEmployees(String filterBy, String filterValue, Integer paginationLimit, Integer paginationOffset)
 	{					
 		if(paginationLimit == null || paginationLimit <= 0) { paginationLimit = 10; }
@@ -63,7 +62,7 @@ public class EmployeeService
 			throw new GetAllFilterException(FilterTypesExceptions.WRONGFILTERTYPE, filterBy, filterValue); 
 		}
 		
-		if ((filterValue == null || filterValue.isEmpty()) && !filterBy.toUpperCase().equals("NONE"))
+		if ((filterValue == null || filterValue.isEmpty()) && !filterBy.equalsIgnoreCase("NONE"))
 		{ 
 			throw new GetAllFilterException(FilterTypesExceptions.EMPTYFILTERVALUE, filterBy, filterValue); 
 		}
@@ -76,9 +75,7 @@ public class EmployeeService
 		Employee employee = employeeRepository.findById(employeeId)
 				.orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 		
-		EmployeeDTO employeeDTO = employeeDTOMapper.convertToDto(employee);
-		
-		return employeeDTO;
+		return employeeDTOMapper.convertToDto(employee);
 	}
 	
 	public void putOneEmployee(Long employeeId, EmployeeDTO newEmployee) 
@@ -135,7 +132,7 @@ public class EmployeeService
 			String status = emailValidationResponse.getData().getEmailAttributes().getStatus();
 			boolean regex = emailValidationResponse.getData().getEmailAttributes().isRegex();
 			
-			if(regex && validStatusList.contains(status.toUpperCase())) 
+			if(regex && validStatusList.contains(status.toUpperCase()))
 			{
 				Employee employee = employeeRepository.findByEmail(email);
 				
@@ -174,8 +171,6 @@ public class EmployeeService
 		Pageable paging = PageRequest.of(paginationOffset, paginationLimit);
 		
 		Page<Employee> responsePage;
-		
-//		if(filterValue == null) { filterValue = ""; }
 		
 		switch (FilterTypes.valueOf(filterBy.toUpperCase()))
 		{
