@@ -1,0 +1,12 @@
+extends: spectral:oas
+
+rules:
+  custom-rule:
+    description: Id must not be a negative number
+    message: Id must not be a negative number
+    given: $.paths.[*][get,post,put,delete]
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        minimum: 1
