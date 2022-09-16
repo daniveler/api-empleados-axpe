@@ -1,0 +1,241 @@
+{
+	"info": {
+		"_postman_id": "2847a795-09b7-4e71-a947-b2557831f1a4",
+		"name": "api-empleados-axpe",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21970216"
+	},
+	"item": [
+		{
+			"name": "Get all employees",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "daniaxpe",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "daniveler",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/employees/?filterBy=NONE&paginationLimit=2&paginationOffset=0",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees",
+						""
+					],
+					"query": [
+						{
+							"key": "filterBy",
+							"value": "NONE"
+						},
+						{
+							"key": "filterValue",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "paginationLimit",
+							"value": "2"
+						},
+						{
+							"key": "paginationOffset",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get an employee",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "daniaxpe",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "daniveler",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/employees/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit an employee",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Manuel\",\r\n    \"surname1\": \"Gutiérrez\",\r\n    \"surname2\": \"Pérez\",\r\n    \"email\": \"manuel@axpe.es\",\r\n    \"phoneNumber\": \"+34689456123\",\r\n    \"identificationDocumentValue\": \"123456789J\",\r\n    \"identificationDocumentType\": \"NIF\",\r\n    \"nickname\": \"admin\",\r\n    \"password\": \"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe\",\r\n    \"department\": \"TESTING\",\r\n    \"contractStatus\": \"TRAINEE\",\r\n    \"dateOfBirth\": \"1995-06-29\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/employees/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post an employee",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Antonio\",\r\n    \"surname1\": \"Hernández\",\r\n    \"surname2\": \"Hernández\",\r\n    \"email\": \"antonio@axpe.es\",\r\n    \"phoneNumber\": \"+34689456126\",\r\n    \"identificationDocumentValue\": \"423456789W\",\r\n    \"identificationDocumentType\": \"NIF\",\r\n    \"nickname\": \"antonio\",\r\n    \"password\": \"$2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC39kYTJLMBRe\",\r\n    \"department\": \"TESTING\",\r\n    \"contractStatus\": \"TRAINEE\",\r\n    \"emailVerified\": false,\r\n    \"dateOfBirth\": \"1998-01-30\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/employees",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete an employee",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/employees/2",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate email",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-RapidAPI-Key",
+						"value": "9b3c39653emshd4d390317c7cc52p1edca1jsn773aeec76ac2",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "X-RapidAPI-Host",
+						"value": "global-email-v4.p.rapidapi.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/employees/validate-email?email=pepe@axpe.es",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"employees",
+						"validate-email"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "pepe@axpe.es"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test api email validation",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Tomba-Key",
+						"value": "ta_c0a1d9fce1cccff4a134badf434cb1ff2cc79",
+						"type": "text"
+					},
+					{
+						"key": "X-Tomba-Secret",
+						"value": "ts_6bd7ca73-aedf-4410-b434-7ef2ad665ff8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.tomba.io/v1/email-verifier/daniel",
+					"protocol": "https",
+					"host": [
+						"api",
+						"tomba",
+						"io"
+					],
+					"path": [
+						"v1",
+						"email-verifier",
+						"daniel"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
