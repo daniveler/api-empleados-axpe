@@ -1,11 +1,12 @@
 package com.axpe.exercices;
 
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import com.axpe.exercices.persistence.entities.Employee;
@@ -36,7 +38,7 @@ class EmployeeServiceTest
 	@Mock private EmployeeDTOMapper employeeDTOMapper;
 	
 	@InjectMocks
-	private EmployeeService employeeService = new EmployeeService(employeeRepository, employeeDTOMapper);
+	private EmployeeService employeeService;
 
 	@Test
 	@DisplayName("Get all employees filtred by NONE returns paginated list of employees")
@@ -54,18 +56,16 @@ class EmployeeServiceTest
 		EmployeeDTO empDto1 = createEmployeeDTO(1L);
 		EmployeeDTO empDto2 = createEmployeeDTO(2L);
 
-//		List<Employee> empList = Arrays.asList(emp1, emp2);
-//		List<EmployeeDTO> empDtoList = Arrays.asList(empDto1, empDto2);
+		List<Employee> empList = Arrays.asList(emp1, emp2);
 		
-		//Page<Employee> responsePage = new PageImpl<Employee>(empList);
-		Page<Employee> responsePage = mock(Page.class);
+		Page<Employee> responsePage = new PageImpl<Employee>(empList);
 		
-		lenient().when(employeeRepository.findAll(paging)).thenReturn(responsePage);
+		when(employeeRepository.findAll(paging)).thenReturn(responsePage);
 		when(employeeDTOMapper.convertToDto(emp1)).thenReturn(empDto1);
 		when(employeeDTOMapper.convertToDto(emp2)).thenReturn(empDto2);
 		
 		//When
-		ResponseBodyMessage response = this.employeeService.getAllEmployees("NONE", null, 0, 10);
+		ResponseBodyMessage response = this.employeeService.getAllEmployees("NONE", null, 10, 0);
 		
 		//Then
 		assertNotNull(response);
@@ -202,7 +202,7 @@ class EmployeeServiceTest
 		
 		//Then
 		assertFalse(correct);
-		verify(employeeRepository, times(0)).findByEmail(email);
+		verify(employeeRepository, times(1)).findByEmail(email);
 		verify(employeeRepository, times(0)).save(emp);	
 	}
 
@@ -210,17 +210,20 @@ class EmployeeServiceTest
 	@DisplayName("Deletes an employee and returns No Content")
 	void testDeleteOneEmployeeReturnsNoContent()
 	{
-//		Given
-//		Long employeeId = 1L;
-//		Employee emp = createEmployee(employeeId);
-//		
-//		when(employeeRepository.findById(employeeId));
-//		//when(employeeRepository.deleteById(employeeId));
-//		
-//		When
-//		
-//		
-//		Then
+		//Given
+		Long employeeId = 1L;
+		Optional<Employee> optEmp = createOptionalEmployee(employeeId);
+		
+		when(employeeRepository.findById(employeeId)).thenReturn(optEmp);
+		//when(employeeRepository.deleteById(employeeId));
+		
+		//When
+		this.employeeService.deleteOneEmployee(employeeId);
+		
+		//Then
+		assertNotNull(optEmp);
+		verify(employeeRepository, times(1)).findById(employeeId);
+		verify(employeeRepository, times(1)).deleteById(employeeId);
 	}
 	
 	@Test
