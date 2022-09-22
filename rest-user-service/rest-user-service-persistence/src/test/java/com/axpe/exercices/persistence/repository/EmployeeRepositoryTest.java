@@ -22,7 +22,7 @@ import com.axpe.exercices.persistence.enums.IdentificationDocumentType;
 
 class EmployeeRepositoryTest
 {
-	EmployeeRepository employeeRepository;
+	/*EmployeeRepository employeeRepository;
 	
 	@BeforeEach
 	void setUp() throws Exception
@@ -110,6 +110,6 @@ class EmployeeRepositoryTest
 		Optional<Employee> employeeOptional = Optional.of(employee);
 		
 		return employeeOptional;
-	}
+	}*/
 
 }

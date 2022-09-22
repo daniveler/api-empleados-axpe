@@ -566,9 +566,9 @@ components:
           data:
             type: array
             description: Field which contains the data returned by the HTTP method
-            items: {
+            items: 
               $ref: '#/components/schemas/ItemEmployee'
-            }
+            
           pagination:
             type: object
             description: Describes diferent aspects of the pagination
