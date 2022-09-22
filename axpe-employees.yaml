@@ -3,10 +3,15 @@ openapi: 3.0.1
 info:
   title: axpe-employees
   description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '1.1.1'
+  version: '1.1.2'
+#  license:
+#    name: termsOfService
+#    url: termsOfService.com
+    
   contact: 
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
+    url: https://github.com/daniveler/
 
 tags:
   - name: employees
@@ -28,47 +33,14 @@ paths:
           - read
       
       parameters:
-        - schema:
-            type: string
-            minLength: 1
-            maxLength: 50
-            enum:
-              - NONE
-              - NAME
-              - IDENTIFICATIONDOCUMENT
-              - DEPARTMENT
-              - CONTRACTSTATUS
-          name: filterBy
-          in: query
-          required: true
-          description: Type of filter you want to apply
-          
-        - schema:
-            type: string
-            minLength: 1
-            maxLength: 50
-          name: filterValue
-          in: query
-          required: false
-          description: Value of the filter you want to apply
-
-        - schema:
-            type: integer
-            minLength: 1
-            maxLength: 50
-          name: paginationLimit
-          in: query
-          required: false
-          description: Limit of the number of elements which will by shown for each page of the response
-
-        - schema:
-            type: integer
-            minLength: 1
-            maxLength: 50
-          name: paginationOffset
-          in: query
-          required: false
-          description: Number of the page of the response which will be shown
+        # HEADERS 
+        
+        
+        # QUERIES 
+        - $ref: '#/components/parameters/FilterBy'
+        - $ref: '#/components/parameters/FilterValue'
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
 
       responses:
         '200':
@@ -81,39 +53,11 @@ paths:
         '204':
           description: No content
 
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Filter Exception:
-                  value:
-                    code: filterException
-                    message: Filter sent is not valid.
-                    type: ERROR
-                    description: Filter value must not be null for this filter type.
-                Pagination Exception:
-                  value:
-                    code: paginationException
-                    message: Pagination parameters sent are not valid
-                    type: ERROR
-                    description: Pagination limit must be greater than 0
+        '400': 
+          $ref: '#/components/responses/FilterException'
         
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Server Error:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
+          $ref: '#/components/responses/InternalServerError'
 
     post:
       summary: Create New Employee
@@ -146,29 +90,13 @@ paths:
           description: Created
 
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Server Error:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request
+          $ref: '#/components/responses/InternalServerError'
+
 
   '/employees/{employeeId}':
     parameters:
-      - schema:
-          type: integer
-          minimum: 1
-          maximum: 50
-        name: employeeId
-        in: path
-        required: true
-        description: Id of an existing employee
+      - $ref: '#/components/parameters/EmployeeId'
+      
     
     get:
       summary: Get Employee Details by Employee Id
@@ -189,32 +117,10 @@ paths:
                 $ref: '#/components/schemas/GetEmployee'
 
         '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employee Not Found Exception:
-                  value:
-                    code: resourcesNotFoundException
-                    message: Resources requested were not found
-                    type: ERROR
-                    description: Maybe you misspelled the id of the employee or the employee does not exist.
-
+          $ref: '#/components/responses/EmployeeNotFound'
+    
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
+          $ref: '#/components/responses/InternalServerError'
     
     put:
       summary: Update Employee Information
@@ -233,32 +139,10 @@ paths:
           description: No content
         
         '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-               Employee Not Found Exception:
-                  value:
-                    code: resourcesNotFoundException
-                    message: Resources requested were not found
-                    type: ERROR
-                    description: Maybe you misspelled the id of the employee or the employee does not exist
+          $ref: '#/components/responses/EmployeeNotFound'
 
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Server Error:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
+          $ref: '#/components/responses/InternalServerError'
       
       requestBody:
         content:
@@ -285,32 +169,10 @@ paths:
           description: No content
 
         '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employee Not Found Exception:
-                  value:
-                    code: resourcesNotFoundException
-                    message: Resources requested were not found
-                    type: ERROR
-                    description: Maybe you misspelled the id of the employee or the employee does not exist
+          $ref: '#/components/responses/EmployeeNotFound'
 
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Server Error:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
+          $ref: '#/components/responses/InternalServerError'
     
   '/employees/validate-email':
     post:
@@ -381,33 +243,11 @@ paths:
                     type: ERROR
                     description: The email sent does not have the proper syntax
 
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employee Not Found Exception:
-                  value:
-                    code: resourcesNotFoundException
-                    message: Resources requested were not found
-                    type: ERROR
-                    description: Maybe you misspelled the email of the employee.
+        '404': 
+          $ref: '#/components/responses/EmployeeNotFound'
 
         '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Employees Not Found:
-                  value:
-                    code: unexpectedServerError
-                    message: An unexpected server error happened
-                    type: ERROR
-                    description: The server can not answer the request.
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -421,6 +261,66 @@ components:
             read: Grants read access
             write: Grants write access
             admin: Grants access to admin operations
+
+  parameters:
+    # HEADERS
+
+    # PATHS
+    EmployeeId:
+      name: employeeId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+      description: Id of the employee you want to refer to
+
+    # QUERIES
+    FilterBy:
+      name: filterBy
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        enum:
+            - NAME
+            - IDENTIFICATIONDOCUMENT
+            - DEPARTMENT
+            - CONTRACTSTATUS
+      description: Type of filter you want to apply
+
+    FilterValue:
+      name: filterValue
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+      description: Value of filter you want to apply
+
+    PaginationLimit:
+      name: paginationLimit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+      description: Maximum number of elements which will be displayed for each page
+
+    PaginationOffset:
+      name: paginationOffset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+      description: Number of the page which will be displayed
 
   schemas:
     ItemEmployee:
@@ -758,6 +658,8 @@ components:
           type: string
           description: Describes the type of message displayed
           enum:
+            - CRITICAL
+            - FATAL
             - ERROR
             - WARNING
             - INFO
@@ -773,6 +675,75 @@ components:
         - code
         - message
         - type
+
+    ErrorList:
+      title: ErrorList
+      description: List of errors
+      type: object
+      properties:
+        messages:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+
+  responses:
+    EmployeeNotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            code: resourcesNotFound
+            type: ERROR
+            message: Resources requested were not found
+            description: The employee with given employeeId 1 was not found
+    
+    FilterException:
+      description: Bad Request
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            code: filterException
+            message: Filter sent is not valid.
+            type: ERROR
+            description: Filter value must not be null for this filter type.
+    
+    PaginationException:
+      description: Bad Request
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            code: paginationException
+            message: Pagination parameters sent are not valid
+            type: ERROR
+            description: Pagination limit must be greater than 0
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            code: unexpectedServerError
+            message: An unexpected server error happened
+            type: ERROR
+            description: The server can not answer the request.
+    
+
+#      example:
+#       value:
+#         code: resourcesNotFoundException
+#        message: Resources requested were not found
+#        type: ERROR
+#        description: Maybe you misspelled the email of the employee.
+
       
         
 
