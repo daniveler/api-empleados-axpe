@@ -1,251 +1,185 @@
 openapi: 3.0.1
-
 info:
   title: axpe-employees
-  description: This API will provide information about employees working in the company Axpe Consulting S.L.
-  version: '1.1.2'
-#  license:
-#    name: termsOfService
-#    url: termsOfService.com
-    
-  contact: 
+  description: This API will manage information about employees working in the company Axpe Consulting S.L.
+  version: 1.2.0
+  contact:
     name: Daniel Velerdas Sedano
     email: daniel01velerdas@gmail.com
-    url: https://github.com/daniveler/
-
+    url: 'https://github.com/daniveler/'
 tags:
   - name: employees
     description: Refers to existing employees from the company
-
 servers:
   - url: 'https://localhost:8080'
-
 paths:
-  '/employees':
+  /employees:
+    parameters:
+      - $ref: '#/components/parameters/XRequestIdHeader'
     get:
       summary: Get a list of employees
       tags:
         - employees
       description: Get a list of all the employees related with the company based on some optional filters.
-      operationId: get-employees
+      operationId: getEmployees
       security:
         - OAuth2:
-          - read
-      
+            - read
       parameters:
-        # HEADERS 
-        
-        
-        # QUERIES 
+        #HEADERS    
+        - $ref: '#/components/parameters/AcceptLanguageHeader'
+        #QUERIES
         - $ref: '#/components/parameters/FilterBy'
         - $ref: '#/components/parameters/FilterValue'
         - $ref: '#/components/parameters/PaginationLimit'
         - $ref: '#/components/parameters/PaginationOffset'
-
+      
       responses:
         '200':
-          description: Ok
-          content:
-            application/json:
-              schema: 
-                $ref: '#/components/schemas/GetEmployees'
-        
-        '204':
-          description: No content
+          $ref: '#/components/responses/OkGetEmployees'
 
-        '400': 
-          $ref: '#/components/responses/FilterException'
+        '400':
+          $ref: '#/components/responses/BadRequestException'
+          # examples:
+          #   Filter Exception:
+          #     code: filterException
+          #     message: Filter sent is not valid.
+          #     type: ERROR
+          #     description: Filter value must not be null for this filter type.
+          #   Pagination Exception:
+          #     code: paginationException
+          #     message: Pagination parameters sent are not valid
+          #     type: ERROR
+          #     description: Pagination limit must be greater than 0
         
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
         '500':
           $ref: '#/components/responses/InternalServerError'
-
     post:
       summary: Create New Employee
-      operationId: post-employees
+      operationId: postEmployees
       description: Creates a new employee in the system.
-      tags: 
+      tags:
         - employees
-
       security:
         - OAuth2:
-          - write
-
-      parameters:
-        - schema:
-              type: string
-          in: header
-          name: Location
-          required: true
-          description: Field which contains the access token of the API
-
+            - write
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostPutEmployee'
-        description: Post the necessary fields for the API to create a new employee.
-
+        $ref: '#/components/requestBodies/PostPutRequest'
+      
       responses:
         '201':
           description: Created
-
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestIdHeader'
+            Location:
+              $ref: '#/components/headers/Location'
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
         '500':
           $ref: '#/components/responses/InternalServerError'
-
-
   '/employees/{employeeId}':
     parameters:
+      - $ref: '#/components/parameters/AcceptLanguageHeader'
+      - $ref: '#/components/parameters/XRequestIdHeader'
       - $ref: '#/components/parameters/EmployeeId'
-      
-    
     get:
-      summary: Get Employee Details by Employee Id
-      tags: 
+      summary: Get Employee by Employee Id
+      tags:
         - employees
-      operationId: get-employees-employeeId
+      operationId: getEmployeesByEmployeeId
       description: Retrieve the information of the employee with the matching employee ID
       security:
         - OAuth2:
-          - read
-      
+            - read
       responses:
         '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetEmployee'
-
+          $ref: '#/components/responses/OkGetOneEmployee'
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
         '404':
           $ref: '#/components/responses/EmployeeNotFound'
-    
         '500':
           $ref: '#/components/responses/InternalServerError'
-    
     put:
       summary: Update Employee Information
-      operationId: put-employees-employeeId
+      operationId: putEmployeesByEmployeeId
       tags:
         - employees
       description: Update the information of an existing employee given the employee id.
-
       security:
         - OAuth2:
-          - read
-          - write
-      
+            - read
+            - write
       responses:
         '204':
           description: No content
-        
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
         '404':
           $ref: '#/components/responses/EmployeeNotFound'
-
         '500':
           $ref: '#/components/responses/InternalServerError'
-      
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostPutEmployee'
-
-        description: Update all editable properties from existing employee.
+        $ref: '#/components/requestBodies/PostPutRequest'
 
     delete:
       summary: Delete an Employee
-      operationId: delete-employees-employeeId
+      operationId: deleteEmployeesByEmployeeId
       tags:
         - employees
       description: Delete an existing employee given the employee id.
-      
       security:
         - OAuth2:
-          - read
-          - write
-      
+            - read
+            - write
       responses:
         '204':
           description: No content
-
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
         '404':
           $ref: '#/components/responses/EmployeeNotFound'
-
         '500':
           $ref: '#/components/responses/InternalServerError'
-    
-  '/employees/validate-email':
+
+  /employees/validate-email:
+    parameters:
+      - $ref: '#/components/parameters/XRequestIdHeader'
+      - $ref: '#/components/parameters/EmployeeEmail'
     post:
       summary: Validate Employee's email
-      operationId: post-employees-validate-email
+      operationId: postEmployeesValidateEmail
       description: Validates data related to an employee's email given the employee email.
-      tags: 
+      tags:
         - employees
-
       security:
         - OAuth2:
-          - read
-          - write
-
-      parameters:
-        - schema:
-              type: string
-              minLength: 1
-              maxLength: 50
-          in: header
-          name: Authorization
-          required: true
-          description: Field which contains the access token of the API
-      
-        - schema:
-            type: string
-            format: uuid
-          in: header
-          name: X-Request-ID 
-          required: true
-          description: Identifier of the message
-
-        - schema:
-            type: string
-            format: email
-            minLength: 1
-            maxLength: 50
-          name: employeeEmail
-          in: query
-          required: true
-          description: Email of the employee to validate
-
+            - read
+            - write
       responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema: 
-                type:  array
-                items: {
-                  $ref: '#/components/schemas/GetEmployees'
-                }
-        
-        '202':
-          description: Accepted
-
+        '204':
+          description: No content
         '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-              examples:
-                Email Verification Exception:
-                  value:
-                    code: emailVerificationException
-                    message: Email sent is not valid
-                    type: ERROR
-                    description: The email sent does not have the proper syntax
-
-        '404': 
+          $ref: '#/components/responses/BadRequestException'
+        '401':
+          $ref: '#/components/responses/UnauthorizedException'
+        '403':
+          $ref: '#/components/responses/ForbiddenException'
+        '404':
           $ref: '#/components/responses/EmployeeNotFound'
-
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -255,17 +189,40 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
+          authorizationUrl: 'https://example.com/oauth/authorize'
+          tokenUrl: 'https://example.com/oauth/token'
           scopes:
             read: Grants read access
             write: Grants write access
             admin: Grants access to admin operations
-
+  headers:
+    XRequestIdHeader:
+      description: Unique identifier that allows end-to-end traceability of an HTTP request. uuid version 4
+      schema:
+        type: string
+        pattern: '^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$'
+        format: uuid
+    Location:
+      schema:
+        $ref: '#/components/schemas/HttpUrl'
+      description: Indicates the URL to redirect a page to.
   parameters:
-    # HEADERS
-
-    # PATHS
+    AcceptLanguageHeader:
+      name: Accept-Language
+      in: header
+      description: ISO code of the language that the client accepts in response from the server
+      required: true
+      schema:
+        $ref: '#/components/schemas/LanguageFormat'
+    XRequestIdHeader:
+      name: X-Request-ID
+      in: header
+      description: Unique identifier that allows end-to-end traceability of an HTTP request. uuid version 4
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$'
+        format: uuid
     EmployeeId:
       name: employeeId
       in: path
@@ -275,8 +232,6 @@ components:
         minLength: 1
         maxLength: 50
       description: Id of the employee you want to refer to
-
-    # QUERIES
     FilterBy:
       name: filterBy
       in: query
@@ -286,12 +241,11 @@ components:
         minLength: 1
         maxLength: 50
         enum:
-            - NAME
-            - IDENTIFICATIONDOCUMENT
-            - DEPARTMENT
-            - CONTRACTSTATUS
+          - NAME
+          - IDENTIFICATIONDOCUMENT
+          - DEPARTMENT
+          - CONTRACTSTATUS
       description: Type of filter you want to apply
-
     FilterValue:
       name: filterValue
       in: query
@@ -301,7 +255,6 @@ components:
         minLength: 1
         maxLength: 50
       description: Value of filter you want to apply
-
     PaginationLimit:
       name: paginationLimit
       in: query
@@ -311,7 +264,6 @@ components:
         minimum: 1
         maximum: 50
       description: Maximum number of elements which will be displayed for each page
-
     PaginationOffset:
       name: paginationOffset
       in: query
@@ -321,28 +273,31 @@ components:
         minimum: 1
         maximum: 50
       description: Number of the page which will be displayed
-
+    EmployeeEmail:
+      name: employeeEmail
+      in: query
+      required: true
+      schema:
+        type: string
+        format: email
+        minLength: 1
+        maxLength: 50
+      description: Email of the employee to validate
   schemas:
+    HttpUrl:
+      type: string
+      description: URL address.
+      pattern: 'http[s]{0,1}://[a-zA-Z./]+'
+    
+    LanguageFormat:
+      type: string
+      description: Language format to specify the concrete language of a response
+      pattern: '^[a-z]{2}-[A-Z]{2}$'
+    
     ItemEmployee:
       title: ItemEmployee
       type: object
       description: Structure created to represent an employee.
-      example:
-        employeeId: 1
-        firstName: Alice
-        surname1: Smith
-        surname2: Watterson
-        email: alice.smith@gmail.com
-        phoneNumber: +34 666 666 666
-        identificationDocumentValue: 12345678A
-        identificationDocumentType: NIF
-        nickname: alice
-        password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
-        department: DEVELOPMENT
-        contractStatus: INDEFINITE
-        emailVerified: true
-        dateOfBirth: '1997-10-31'
-        entryDate: '2019-08-24'
       properties:
         employeeId:
           type: integer
@@ -352,16 +307,11 @@ components:
           minLength: 1
           maxLength: 50
           description: Name of the employee
-        surname1:
+        lastName:
           type: string
           minLength: 1
           maxLength: 50
-          description: First surname of the employee 
-        surname2:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: Second surname of the employee 
+          description: First surname of the employee
         email:
           type: string
           format: email
@@ -432,160 +382,78 @@ components:
         - nickname
         - password
         - contractStatus
-
-    GetEmployee:
-      title: GetEmployee
-      type: object
-      description: Structure created to return an employee in a get operation.
-      properties:
-        employee:
-            $ref: '#/components/schemas/ItemEmployee'
-      
-      example:
-        employeeId: 1
-        firstName: Alice
-        surname1: Smith
-        surname2: Watterson
-        email: alice.smith@gmail.com
-        phoneNumber: +34 666 666 666
-        identificationDocumentValue: 12345678A
-        identificationDocumentType: NIF
-        nickname: alice
-        password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
-        department: DEVELOPMENT
-        contractStatus: INDEFINITE
-        emailVerified: true
-        dateOfBirth: '1997-10-31'
-        entryDate: '2019-08-24'
-
+        
     GetEmployees:
       title: GetEmployees
       type: object
       description: Structure created to return a list of employees in a get operation
       properties:
-          data:
-            type: array
-            description: Field which contains the data returned by the HTTP method
-            items: 
-              $ref: '#/components/schemas/ItemEmployee'
-            
-          pagination:
-            type: object
-            description: Describes diferent aspects of the pagination
-            properties:
-              offset:
-                type: integer
-                description: Number of the page of the response which will be shown
-              limit:
-                type: integer
-                description: Number of results which will be shown in each page of the response
-              pageNumber:
-                type: integer
-                description: Actual page number of the data shown
-              totalPages:
-                type: integer
-                description: Total number of pages found by the operation GET
-              totalElements:
-                type: integer
-                description: Number of results displayed for each page
-              links: 
-                type: object
-                properties:
-                  first:
-                    type: string
-                    format: url
-                    description: Link to the first page of the results
-                  prev:
-                    type: string
-                    format: url
-                    description: Link to the previous page of the results
-                  self:
-                    type: string
-                    format: url
-                    description: Link of the actual page of the results
-                  next:
-                    type: string
-                    format: url
-                    description: Link of the next page of the results
-                  last:
-                    type: string
-                    format: url
-                    description: Link of the last page of the results
-      example:
         data:
-          - employeeId: 1
-            firstName: Alice
-            surname1: Smith
-            surname2: Watterson
-            email: alice.smith@gmail.com
-            phoneNumber: +34 666 666 666
-            identificationDocumentValue: 12345678A
-            identificationDocumentType: NIF
-            nickname: alice
-            password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
-            department: DEVELOPMENT
-            contractStatus: INDEFINITE
-            emailVerified: true
-            dateOfBirth: '1997-10-31'
-            entryDate: '2019-08-24'
-
-          - employeeId: 2
-            firstName: Bob
-            surname1: Fellow
-            surname2: Fellow
-            email: bob.fellow@gmail.com
-            phoneNumber: 666 66 66 67
-            identificationDocumentValue: 12345678A
-            identificationDocumentType: NIF
-            nickname: bob
-            password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRd
-            department: DEVELOPMENT
-            contractStatus: INDEFINITE
-            emailVerified: true
-            dateOfBirth: '1997-10-31'
-            entryDate: '2019-08-24'
-        
+          type: array
+          description: Field which contains the data returned by the HTTP method
+          items:
+            $ref: '#/components/schemas/ItemEmployee'
         pagination:
-          offset: 0
-          limit: 2
-          actualPage: 1
-          totalPages: 2
-          totalElements: 4
+          $ref: '#/components/schemas/Pagination'
 
+    Pagination:
+      type: object
+      description: Describes diferent aspects of the pagination
+      properties:
+        offset:
+          type: integer
+          description: Number of the page of the response which will be shown
+        limit:
+          type: integer
+          description: Number of results which will be shown in each page of the response
+        pageNumber:
+          type: integer
+          description: Actual page number of the data shown
+        totalPages:
+          type: integer
+          description: Total number of pages found by the operation GET
+        totalElements:
+          type: integer
+          description: Number of results displayed for each page
+        links:
+          type: object
+          properties:
+            first:
+              description: Link to the first page of the results
+              allOf:
+                - $ref: '#/components/schemas/HttpUrl'
+            prev:
+              description: Link to the previous page of the results
+              allOf:
+                - $ref: '#/components/schemas/HttpUrl'
+            self:
+              description: Link of the actual page of the results
+              allOf:
+                - $ref: '#/components/schemas/HttpUrl'
+            next:
+              description: Link of the next page of the results
+              allOf:
+                - $ref: '#/components/schemas/HttpUrl'
+            last:
+              description: Link of the last page of the results
+              allOf:
+                - $ref: '#/components/schemas/HttpUrl'
+    
     PostPutEmployee:
       title: PostPutEmployee
       type: object
       description: Structure created to create a new employee with a post operation or editing an existing one with a put operation.
-      example:
-        firstName: Alice
-        surname1: Smith
-        surname2: Watterson
-        email: alice.smith@gmail.com
-        phoneNumber: +34 666 666 666
-        identificationDocumentValue: 12345678A
-        identificationDocumentType: NIF
-        nickname: alice
-        password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
-        department: DEVELOPMENT
-        contractStatus: INDEFINITE
-        emailVerified: true
-        dateOfBirth: '1997-10-31'
       properties:
         firstName:
           type: string
           minLength: 1
           maxLength: 50
           description: Name of the employee
-        surname1:
+        lastNames:
           type: string
           minLength: 1
           maxLength: 50
-          description: First surname of the employee 
-        surname2:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: Second surname of the employee 
+          description: Surnames of the employee
         email:
           type: string
           format: email
@@ -642,87 +510,199 @@ components:
         - identificationDocumentType
         - nickname
         - password
-
+   
     ErrorMessage:
       title: ErrorMessage
       type: object
       description: Object returned when an error happens
       properties:
-        code: 
-          type: string
-          description: Field which briefly defines the problem
-        message:
-          type: string
-          description: Message which describes the main issue
-        type: 
-          type: string
-          description: Describes the type of message displayed
-          enum:
-            - CRITICAL
-            - FATAL
-            - ERROR
-            - WARNING
-            - INFO
-        description:
-          type: string
-          description: Describes other details of the error
-      example:
-        code: invalidParameters
-        message: There are invalid parameters in the request
-        type: ERROR
-        description: 'Address is not valid. Invalid character: ''@'''
-      required:
-        - code
-        - message
-        - type
-
-    ErrorList:
-      title: ErrorList
-      description: List of errors
-      type: object
-      properties:
         messages:
           type: array
           maxItems: 5
+          description: List of error messages
           items:
-            $ref: '#/components/schemas/ErrorMessage'
+            type: object
+            description: Information of the error produced
+            properties:
+              code:
+                type: string
+                description: Field which briefly defines the problem
+              message:
+                type: string
+                description: Message which describes the main issue
+              type:
+                type: string
+                description: Describes the type of message displayed
+                  CRITICAL- error that prevents the operation of the entire application.
+                  FATAL - error that prevents the operation of a specific functionality.
+                  ERROR - error that does not affect more features.
+                  WARNING - application works but a warning has been generated.
+                  INFO - operative info message.
+                enum:
+                  - CRITICAL
+                  - FATAL
+                  - ERROR
+                  - WARNING
+                  - INFO
+              description:
+                type: string
+                description: Describes other details of the error
+            required:
+              - code
+              - message
+              - type
+
+  requestBodies:
+    PostPutRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostPutEmployee'
+          example:
+            firstName: Alice
+            lastName: Smith Watterson
+            email: alice.smith@gmail.com
+            phoneNumber: +34 666 666 666
+            identificationDocumentValue: 12345678A
+            identificationDocumentType: NIF
+            nickname: alice
+            password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
+            department: DEVELOPMENT
+            contractStatus: INDEFINITE
+            emailVerified: true
+            dateOfBirth: '1997-10-31'
+      description: Request to create a new employee or update an existing one
+      
 
   responses:
+    OkGetOneEmployee:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemEmployee'
+          example:
+            data:
+              - employeeId: 1
+                firstName: Alice
+                lastName: Smith Watterson
+                email: alice.smith@gmail.com
+                phoneNumber: +34 666 666 666
+                identificationDocumentValue: 12345678A
+                identificationDocumentType: NIF
+                nickname: alice
+                password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
+                department: DEVELOPMENT
+                contractStatus: INDEFINITE
+                emailVerified: true
+                dateOfBirth: '1997-10-31'
+                entryDate: '2019-08-24'
+    
+    OkGetEmployees:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetEmployees'
+          example:
+            data:
+              - employeeId: 1
+                firstName: Alice
+                lastName: Smith Watterson
+                email: alice.smith@gmail.com
+                phoneNumber: +34 666 666 666
+                identificationDocumentValue: 12345678A
+                identificationDocumentType: NIF
+                nickname: alice
+                password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRe
+                department: DEVELOPMENT
+                contractStatus: INDEFINITE
+                emailVerified: true
+                dateOfBirth: '1997-10-31'
+                entryDate: '2019-08-24'
+              - employeeId: 2
+                firstName: Bob
+                lastName: Fellow Fellow
+                email: bob.fellow@gmail.com
+                phoneNumber: 666 66 66 67
+                identificationDocumentValue: 12345678A
+                identificationDocumentType: NIF
+                nickname: bob
+                password: $2a$10$FRDQgZ83i4/E7Edw6cijIu6lRxiBv5GJu5wD8CiRWC19kYTJLMBRd
+                department: DEVELOPMENT
+                contractStatus: INDEFINITE
+                emailVerified: true
+                dateOfBirth: '1997-10-31'
+                entryDate: '2019-08-24'
+            pagination:
+              offset: 0
+              limit: 2
+              actualPage: 1
+              totalPages: 2
+              totalElements: 4
+              links:
+                first: "https://localhost:8080/employees/"
+                prev: "http://localhost:8080/employees/"
+                self: "http://localhost:8080/employees/"
+                next: "http://localhost:8080/employees/"
+                last: "http://localhost:8080/employees/"
+
+    
     EmployeeNotFound:
       description: Not Found
       content:
         application/json:
-          schema: 
+          schema:
             $ref: '#/components/schemas/ErrorMessage'
           example:
-            code: resourcesNotFound
-            type: ERROR
-            message: Resources requested were not found
-            description: The employee with given employeeId 1 was not found
+            messages:
+              - code: resourcesNotFound
+                type: ERROR
+                message: Resources requested were not found
+                description: The employee with given employeeId 1 was not found
     
-    FilterException:
+    BadRequestException:
       description: Bad Request
       content:
         application/json:
-          schema: 
+          schema:
             $ref: '#/components/schemas/ErrorMessage'
           example:
-            code: filterException
-            message: Filter sent is not valid.
-            type: ERROR
-            description: Filter value must not be null for this filter type.
-    
-    PaginationException:
-      description: Bad Request
+            messages:
+              - code: filterException
+                type: ERROR
+                message: Filter value entered is not valid
+                description: Filter value must not be null for this filter type
+
+    UnauthorizedException:
+      description: Unauthorized
       content:
         application/json:
-          schema: 
+          schema:
             $ref: '#/components/schemas/ErrorMessage'
           example:
-            code: paginationException
-            message: Pagination parameters sent are not valid
-            type: ERROR
-            description: Pagination limit must be greater than 0
+            messages:
+              - code: noAutorithationException
+                type: ERROR
+                message: You have no autorithation
+                description: Try authenticating before using this method
+
+    ForbiddenException:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            messages:
+              - code: forbiddenException
+                type: ERROR
+                message: You have no autorithation
+                description: You have no autorithation to use this method
 
     InternalServerError:
       description: Internal Server Error
@@ -731,20 +711,8 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
           example:
-            code: unexpectedServerError
-            message: An unexpected server error happened
-            type: ERROR
-            description: The server can not answer the request.
-    
-
-#      example:
-#       value:
-#         code: resourcesNotFoundException
-#        message: Resources requested were not found
-#        type: ERROR
-#        description: Maybe you misspelled the email of the employee.
-
-      
-        
-
-        
+            messages:
+              - code: internalErrorException
+                type: ERROR
+                message: An internal server error has occurred
+                description: Please, contact with server administrator
